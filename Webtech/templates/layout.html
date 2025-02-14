@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+<body>
+    <div class="header bg-primary text-white p-3">
+        <h4>Twitter</h4>
+    </div>
+    <div class="container_box d-flex">
+        <div class="Leftside bg-light p-3">
+            <ul class="list-unstyled">
+                <li><a href="#" class="nav-item"><i class="bi bi-house"></i> Home</a></li>
+                <li><a href="#" class="nav-item"><i class="bi bi-hash"></i> Explore</a></li>
+                <li><a href="#" class="nav-item"><i class="bi bi-bell"></i> Notifications</a></li>
+                <li><a href="#" class="nav-item"><i class="bi bi-envelope"></i> Messages</a></li>
+                <li><a href="#" class="nav-item"><i class="bi bi-bookmark"></i> Bookmarks</a></li>
+                <li><a href="#" class="nav-item"><i class="bi bi-person"></i> Profile</a></li>
+                <li><a href="#" class="nav-item"><i class="bi bi-three-dots-vertical"></i> More</a></li>
+            </ul>
+        </div>
+        
+        <div class="content flex-grow-1 p-3">
+            {% block content %}
+            {% endblock %}
+        </div>
+        
+        <div class="rightside bg-light p-3">
+            <!-- Search Section -->
+            <div class="search-section mb-4">
+                <input type="text" class="form-control" placeholder="Search Twitter">
+            </div>
+            
+            <!-- Photo Gallery Section -->
+            <div class="photo-gallery mb-4">
+                <div class="row">
+                    <div class="photo">
+                        <img src="https://via.placeholder.com/100" alt="Image 1">
+                    </div>
+                    <div class="photo">
+                        <img src="https://via.placeholder.com/100" alt="Image 2">
+                    </div>
+                    <div class="photo">
+                        <img src="https://via.placeholder.com/100" alt="Image 3">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- You Might Like Section -->
+            <div class="you-might-like">
+                <h5>You Might Like</h5>
+                <ul class="list-unstyled">
+                    <li><a href="#">User 1</a></li>
+                    <li><a href="#">User 2</a></li>
+                    <li><a href="#">User 3</a></li>
+                    <li><a href="#">User 4</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
