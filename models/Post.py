@@ -1,0 +1,36 @@
+from typing import List
+from sqlalchemy.orm import Mapped
+from setup import db
+from User import User
+
+class Post(db.Model):
+    __tablename__ = "posts"
+
+    id: Mapped[int] = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    Title: Mapped[str] = db.Column(db.String(50))
+    Content: Mapped[str] = db.Column(db.Text)
+
+    UserId: Mapped[int] = db.Column(
+        db.Integer, db.ForeignKey("users.id"), nullable=False
+    )
+    User: Mapped["User"] = db.relationship(
+        back_populates="posts", foreign_keys=[UserId]
+    )
+
+    ParentPostId: Mapped[int] = db.Column(db.Integer, db.ForeignKey("posts.id"))
+
+    comments: Mapped[List["Post"]] = db.relationship(foreign_keys=[ParentPostId])
+
+    RepostId: Mapped[int] = db.Column(db.Integer, db.ForeignKey("posts.id"))
+    Repost: Mapped["Post"] = db.relationship(foreign_keys=[RepostId], remote_side=[id])
+
+    def __init__(self, UserId, Title, Content, ParentPostId=None, RepostId=None):
+        self.UserId = UserId
+        self.ParentPostId = ParentPostId
+        self.RepostId = RepostId
+        self.Title = Title
+        self.Content = Content
+
+    def __repr__(self):
+        return f"id: {self.id}, title: {self.Title}, content: {self.Content}, userId: {self.UserId}"
+
