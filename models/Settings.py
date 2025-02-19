@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Mapped
 from setup import db
 
+
 class Settings(db.Model):
     __tablename__ = "settings"
 
@@ -9,7 +10,7 @@ class Settings(db.Model):
     UserId: Mapped[int] = db.Column(
         db.Integer, db.ForeignKey("users.id"), nullable=False
     )
-    User: Mapped["User"] = db.relationship(foreign_keys=[UserId])
+    User: Mapped["User"] = db.relationship(back_populates="settings")
 
     DarkMode: Mapped[bool] = db.Column(db.Boolean, default=False)
 

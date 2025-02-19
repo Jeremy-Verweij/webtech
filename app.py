@@ -26,6 +26,8 @@ def login():
         if user and user.passwordHash == password:
             session["user_id"] = user.id
             session["user_name"] = user.UserName
+            if user.settings:
+                session["dark_mode"] = user.settings.DarkMode
 
             return redirect(url_for("index"))
         else:

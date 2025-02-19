@@ -4,6 +4,7 @@ from setup import db
 from .Following import following_table
 from .Like import user_post_likes
 
+
 class User(db.Model):
     __tablename__ = "users"
 
@@ -39,6 +40,8 @@ class User(db.Model):
     liked_posts: Mapped[List["Post"]] = db.relationship(
         "Post", secondary=user_post_likes, back_populates="likes"
     )
+
+    settings: Mapped["Settings"] = db.relationship(back_populates="User")
 
     def __init__(
         self, passwordHash, EmailAdress, UserName, Private=None, ProfilePictureId=None
