@@ -1,7 +1,7 @@
 from typing import List
 from sqlalchemy.orm import Mapped
 from setup import db
-from User import User
+from .Like import user_post_likes
 
 class Post(db.Model):
     __tablename__ = "posts"
@@ -24,6 +24,10 @@ class Post(db.Model):
     RepostId: Mapped[int] = db.Column(db.Integer, db.ForeignKey("posts.id"))
     Repost: Mapped["Post"] = db.relationship(foreign_keys=[RepostId], remote_side=[id])
 
+    likes: Mapped[List["User"]] = db.relationship(
+        "User", secondary=user_post_likes, back_populates="liked_posts"
+    )
+
     def __init__(self, UserId, Title, Content, ParentPostId=None, RepostId=None):
         self.UserId = UserId
         self.ParentPostId = ParentPostId
@@ -32,5 +36,4 @@ class Post(db.Model):
         self.Content = Content
 
     def __repr__(self):
-        return f"id: {self.id}, title: {self.Title}, content: {self.Content}, userId: {self.UserId}"
-
+        return f"<id: {self.id}, title: {self.Title}, content: {self.Content}, userId: {self.UserId}>"

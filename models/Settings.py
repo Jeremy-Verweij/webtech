@@ -1,7 +1,5 @@
-from typing import List
 from sqlalchemy.orm import Mapped
 from setup import db
-from User import User
 
 class Settings(db.Model):
     __tablename__ = "settings"
@@ -14,3 +12,9 @@ class Settings(db.Model):
     User: Mapped["User"] = db.relationship(foreign_keys=[UserId])
 
     DarkMode: Mapped[bool] = db.Column(db.Boolean, default=False)
+
+    def __init__(self, darkMode=False):
+        self.DarkMode = darkMode
+
+    def __repr__(self):
+        return f"<id: {self.id}, user_id: {self.UserId}>"
