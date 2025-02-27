@@ -180,7 +180,6 @@ def settings():
     conn.close()
     return render_template('settings.html', language=user_settings['Language'] if user_settings else 'en')
 
-# Change Language Setting
 @app.route('/change_language', methods=['POST'])
 def change_language():
     if 'user_id' not in session:
@@ -194,7 +193,23 @@ def change_language():
     conn.commit()
     conn.close()
     
+    # Store the selected language in session
+    session['language'] = language
+
     return redirect(url_for('index'))
+
+def get_user_language():
+    if 'language' in session:
+        return session['language']
+
+    if 'user_id' in session:
+        conn = get_db_connection()
+        lang = conn.execute("SELECT Language FROM Settings WHERE UserID = ?", 
+                            (session['user_id'],)).fetchone()
+        conn.close()
+        return lang['Language'] if lang else 'EN'  # Default to English
+    
+    return 'EN'  # Default for guests
 
 # Login
 @app.route('/login', methods=['GET', 'POST'])
