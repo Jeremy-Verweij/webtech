@@ -1,10 +1,12 @@
 import sqlite3
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import render_template, request, redirect, url_for, session, flash
 import os
 import hashlib
-import base64
 
-app = Flask(__name__)
+from sqlalchemy import func
+from setup import app, db
+from models import *
+
 app.secret_key = os.urandom(24) 
 
 db_path = 'database/db.sqlite'
@@ -22,16 +24,11 @@ def index():
     if 'user_id' not in session:
         return redirect(url_for('login'))
 
-    conn = get_db_connection()
-    posts = conn.execute("""
-        SELECT Posts.PostID, Posts.Title, Posts.Content, Users.UserName, Users.ProfilePicture,
-               (SELECT COUNT(*) FROM Likes WHERE Likes.PostID = Posts.PostID) AS Likes
-        FROM Posts
-        JOIN Users ON Posts.UserID = Users.UUID
-        ORDER BY Posts.PostID DESC
-    """).fetchall()
+    posts = db.session.query(Post.id.label("PostID"), Post.Title.label("Title"), Post.Content.label("Content"), User.UserName.label("UserName"), func.count(user_post_likes.c.PostId).label("Likes")) \
+        .outerjoin(user_post_likes, user_post_likes.c.PostId == Post.id) \
+        .join(User, User.id == Post.UserId) \
+        .group_by(Post.id).all()
 
-    conn.close()
     return render_template('index.html', user_name=session['user_name'], posts=posts)
 
 # Create Post
@@ -43,11 +40,9 @@ def create_post():
     title = request.form.get('title')
     content = request.form.get('content')
 
-    conn = get_db_connection()
-    conn.execute("INSERT INTO Posts (UserID, Title, Content) VALUES (?, ?, ?)",
-                 (session['user_id'], title, content))
-    conn.commit()
-    conn.close()
+    new_post = Post(session["user_id"], title, content)
+    db.session.add(new_post)
+    db.session.commit()
 
     return redirect(url_for('index'))
 
@@ -56,20 +51,21 @@ def create_post():
 def like_post(post_id):
     if 'user_id' not in session:
         return redirect(url_for('login'))
-
-    conn = get_db_connection()
-    existing_like = conn.execute("SELECT * FROM Likes WHERE UserID = ? AND PostID = ?", 
-                                 (session['user_id'], post_id)).fetchone()
     
-    if existing_like:
-        conn.execute("DELETE FROM Likes WHERE UserID = ? AND PostID = ?", 
-                     (session['user_id'], post_id))  # Unlike
-    else:
-        conn.execute("INSERT INTO Likes (UserID, PostID) VALUES (?, ?)", 
-                     (session['user_id'], post_id))  # Like
+    existing_like = db.session.query(user_post_likes.c.PostId) \
+        .where(user_post_likes.c.PostId == post_id and user_post_likes.c.UserId == session["user_id"]) \
+        .one_or_none()
+    post = db.session.query(Post).where(Post.id == post_id).one_or_none()
+    user = db.session.query(User).where(User.id == session["user_id"]).one_or_none()
 
-    conn.commit()
-    conn.close()
+    if existing_like and post:
+        post.likes.remove(user)
+        db.session.add(post)
+    else:
+        post.likes.append(user)
+        db.session.add(post)
+    db.session.commit()
+    
     return redirect(url_for('index'))
 
 # Follow/Unfollow User
@@ -78,19 +74,21 @@ def follow_user(user_id):
     if 'user_id' not in session:
         return redirect(url_for('login'))
 
-    conn = get_db_connection()
-    already_following = conn.execute("SELECT * FROM Following WHERE UserID = ? AND FollowedUserID = ?", 
-                                     (session['user_id'], user_id)).fetchone()
 
-    if already_following:
-        conn.execute("DELETE FROM Following WHERE UserID = ? AND FollowedUserID = ?", 
-                     (session['user_id'], user_id))  # Unfollow
+    existing_follow = db.session.query(following_table.c.UserId) \
+        .where(following_table.c.FollowedUserId == user_id and following_table.c.UserId == session["user_id"]) \
+        .one_or_none()
+    user_to_follow = db.session.query(User).where(User.id == user_id).one_or_none()
+    user = db.session.query(User).where(User.id == session["user_id"]).one_or_none()
+
+    if existing_follow and user_to_follow:
+        user_to_follow.followers.remove(user)
+        db.session.add(user)
     else:
-        conn.execute("INSERT INTO Following (UserID, FollowedUserID) VALUES (?, ?)", 
-                     (session['user_id'], user_id))  # Follow
+        user_to_follow.likes.append(user)
+        db.session.add(user)
+    db.session.commit()
 
-    conn.commit()
-    conn.close()
     return redirect(url_for('index'))
 
 # Repost
@@ -99,11 +97,10 @@ def repost(post_id):
     if 'user_id' not in session:
         return redirect(url_for('login'))
 
-    conn = get_db_connection()
-    conn.execute("INSERT INTO Posts (UserID, RepostID) VALUES (?, ?)", 
-                 (session['user_id'], post_id))
-    conn.commit()
-    conn.close()
+    repost = Post(session["user_id"], None, None, None, post_id)
+    db.session.add(repost)
+    db.session.commit()
+
     return redirect(url_for('index'))
 
 
@@ -218,13 +215,12 @@ def login():
         email = request.form['email']
         password = hash_password(request.form['password'])
         
-        conn = get_db_connection()
-        user = conn.execute('SELECT * FROM Users WHERE EmailAdress = ? AND PasswordHash = ?', (email, password)).fetchone()
-        conn.close()
+        user = db.session.query(User).filter(User.EmailAdress == email).one_or_none()
 
-        if user:
-            session['user_id'] = user['UUID'] 
-            session['user_name'] = user['UserName'] 
+        if user and user.passwordHash == password:
+            session["user_id"] = user.id
+            session["user_name"] = user.UserName
+
             return redirect(url_for('index'))  
         else:
             return render_template('login.html', error="Invalid credentials.")
@@ -239,15 +235,12 @@ def register():
         username = request.form['username']
         password = hash_password(request.form['password'])
 
-        conn = get_db_connection()
         try:
-            conn.execute("INSERT INTO Users (PasswordHash, EmailAdress, UserName) VALUES (?, ?, ?)", 
-                         (password, email, username))
-            conn.commit()
-        except sqlite3.IntegrityError:
+            new_user = User(password, email, username)
+            db.session.add(new_user)
+            db.session.commit()
+        except:
             return render_template('register.html', error="Email already in use.")
-        finally:
-            conn.close()
 
         return redirect(url_for('login'))
 
