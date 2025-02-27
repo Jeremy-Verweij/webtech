@@ -59,16 +59,24 @@ body {
     width: 100%;
 }
 
-.photo-gallery{
-    background-color: blue;
+.photo-gallery {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px; /* Minimal space between images */
 }
 
-.photo-gallery img {
-    background-color: red;
-    margin-bottom: 10px;
-    width: 100px;
-    height: 100px;
+.photo-box {
+    width: calc(100% / 3 - 2px); /* 3 columns with minimal spacing */
+    aspect-ratio: 1; /* Ensures square shape */
 }
+
+.photo-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Keeps images looking good */
+    border-radius: 5px;
+}
+
 
 .you-might-like ul {
     list-style-type: none;
