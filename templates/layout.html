@@ -1,112 +1,91 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web App</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    
-    <style>
-        /* Dropdown Styling */
-        .dropdown {
-            position: relative;
-            display: inline-block;
-        }
+{% extends 'boiler_plate.html' %} {% block header %}
+<title>Web App</title>
+<!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"> -->
+{% endblock %} {% block body %}
+<div class="d-flex flex-column vh-100">
+  <div
+    class="header bg-primary text-white p-3 d-flex justify-content-between align-items-center"
+  >
+    <h4>Twitter</h4>
 
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            right: 0;
-            background-color: white;
-            min-width: 150px;
-            border: 1px solid #ddd;
-            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-        }
+    <!-- CSS Dropdown Menu -->
+    <div class="dropdown">
+      <button
+        class="btn btn-light btn-secondary dropdown-toggle"
+        type="button"
+        data-bs-toggle="dropdown"
+        aria-expanded="false"
+      >
+        <img
+          src="{{ url_for('profile_picture', user_id=session['user_id']) }}"
+          alt="Profile Picture"
+          class="rounded-circle"
+          width="40"
+          height="40"
+        />
+      </button>
+      <ul class="dropdown-menu">
+        <li>
+          <a class="dropdown-item" href="{{ url_for('index') }}"
+            ><i class="bi bi-person"></i> Profile</a
+          >
+        </li>
+        <li>
+          <a class="dropdown-item" href="{{ url_for('edit_profile') }}"
+            ><i class="bi bi-pencil-square"></i> Edit Profile</a
+          >
+        </li>
+        <li>
+          <a class="dropdown-item" href="{{ url_for('settings') }}"
+            ><i class="bi bi-gear"></i> Settings</a
+          >
+        </li>
+        <li>
+          <a
+            class="dropdown-item"
+            href="{{ url_for('logout') }}"
+            class="text-danger"
+            ><i class="bi bi-box-arrow-right"></i> Logout</a
+          >
+        </li>
+      </ul>
+    </div>
+  </div>
 
-        .dropdown-content a {
-            display: block;
-            padding: 10px;
-            text-decoration: none;
-            color: black;
-            font-size: 14px;
-        }
-
-        .dropdown-content a:hover {
-            background-color: #f1f1f1;
-        }
-
-        /* Show dropdown on hover */
-        .dropdown:hover .dropdown-content {
-            display: block;
-        }
-    </style>
-</head>
-<body>
-    <div class="header bg-primary text-white p-3 d-flex justify-content-between align-items-center">
-        <h4>Twitter</h4>
-
-        <!-- CSS Dropdown Menu -->
-        <div class="dropdown">
-            <button class="btn btn-light dropdown-toggle p-0" type="button" id="userDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <img src="{{ url_for('profile_picture', user_id=session['user_id']) }}" alt="Profile Picture" class="rounded-circle" width="40" height="40">
-            </button>
-            <div class="dropdown-content">
-                <a href="{{ url_for('index') }}"><i class="bi bi-person"></i> Profile</a>
-                <a href="{{ url_for('edit_profile') }}"><i class="bi bi-pencil-square"></i> Edit Profile</a>
-                <a href="{{ url_for('settings') }}"><i class="bi bi-gear"></i> Settings</a>
-                <a href="{{ url_for('logout') }}" class="text-danger"><i class="bi bi-box-arrow-right"></i> Logout</a>
-            </div>
-        </div>
+  <div class="d-flex flex-grow-1">
+    <div class="bg-light p-3">
+      <ul class="list-unstyled">
+        <li class="p-3">
+          <a href="{{ url_for('index') }}" class="nav-item"
+            ><i class="bi bi-house"></i> Home</a
+          >
+        </li>
+        <li class="p-3">
+          <a href="{{ url_for('index') }}" class="nav-item"
+            ><i class="bi bi-hash"></i> Explore</a
+          >
+        </li>
+        <li class="p-3">
+          <a href="{{ url_for('index') }}" class="nav-item"
+            ><i class="bi bi-bell"></i> Notifications</a
+          >
+        </li>
+        <li class="p-3">
+          <a href="{{ url_for('index') }}" class="nav-item"
+            ><i class="bi bi-envelope"></i> Messages</a
+          >
+        </li>
+        <li class="p-3">
+          <a href="{{ url_for('index') }}" class="nav-item"
+            ><i class="bi bi-bookmark"></i> Bookmarks</a
+          >
+        </li>
+      </ul>
     </div>
 
-    <div class="container_box d-flex">
-        <div class="Leftside bg-light p-3">
-            <ul class="list-unstyled">
-                <li><a href="{{ url_for('index') }}" class="nav-item"><i class="bi bi-house"></i> Home</a></li>
-                <li><a href="{{ url_for('index') }}" class="nav-item"><i class="bi bi-hash"></i> Explore</a></li>
-                <li><a href="{{ url_for('index') }}" class="nav-item"><i class="bi bi-bell"></i> Notifications</a></li>
-                <li><a href="{{ url_for('index') }}" class="nav-item"><i class="bi bi-envelope"></i> Messages</a></li>
-                <li><a href="{{ url_for('index') }}" class="nav-item"><i class="bi bi-bookmark"></i> Bookmarks</a></li>
-            </ul>
-        </div>
-        
-        <div class="content flex-grow-1 p-3">
-            {% block content %}
-            {% endblock %}
-        </div>
-        
-        <div class="rightside p-3">
-            <!-- Photo Gallery Section -->
-            <div class="photo-gallery mb-4">
-                <h5 class="text-white">Photo Gallery</h5>
-                <div class="d-flex flex-wrap">
-                    {% for i in range(6) %}
-                    <div class="photo-box" style="background-color: blue;">
-                        <img src="https://via.placeholder.com/100" alt="Image {{ i+1 }}" class="img-fluid">
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-        
-            <!-- Suggested Users Section -->
-            <div class="you-might-like">
-                <h5 class="text-white">People You Might Like</h5>
-                <ul class="list-unstyled">
-                    {% for user in suggested_users %}
-                    <li class="d-flex align-items-center mb-2">
-                        <img src="{{ url_for('profile_picture', user_id=user['UUID']) }}" alt="Profile" class="rounded-circle mr-2" width="40" height="40">
-                        <a href="#" class="text-white">{{ user['UserName'] }}</a>
-                    </li>
-                    {% endfor %}
-                </ul>
-            </div>
-        </div>
+    <div class="content flex-grow-1 p-3">
+      {% block content %} {% endblock %}
     </div>
-</body>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.9.3/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-</html>
+  </div>
+</div>
+{% endblock %}

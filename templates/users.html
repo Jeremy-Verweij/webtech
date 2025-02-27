@@ -1,23 +1,24 @@
-{% extends 'layout.html' %}
-
-{% block content %}
-  <h1>Gebruikerslijst</h1>
-  <table class="table table-striped">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Naam</th>
-        <th>Email</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for user in users %}
-        <tr>
-          <td>{{ user[0] }}</td>  <!-- ID van de gebruiker -->
-          <td>{{ user[1] }}</td>  <!-- Naam van de gebruiker -->
-          <td>{{ user[2] }}</td>  <!-- Email van de gebruiker -->
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+{% extends 'layout.html' %} {% block content %}
+<h1>Gebruikerslijst</h1>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Naam</th>
+      <th>Email</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for user in users %}
+    <tr>
+      <td>{{ user[0] }}</td>
+      <!-- ID van de gebruiker -->
+      <td>{{ user[1] }}</td>
+      <!-- Naam van de gebruiker -->
+      <td>{{ user[2] }}</td>
+      <!-- Email van de gebruiker -->
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
 {% endblock %}
