@@ -2,7 +2,16 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h2>Welcome, {{ user_name }}!</h2>
+    {% if session['language'] == 'NL' %}
+        <h1>Welkom {{ user_name }}!</h1>
+        <p>Deze website maakt gebruik van Flask, SQLite en Bootstrap.</p>
+    {% elif session['language'] == 'FR' %}
+        <h1>Bienvenue {{ user_name }}!</h1>
+        <p>Ce site Web utilise Flask, SQLite et Bootstrap.</p>
+    {% else %}
+        <h1>Welcome {{ user_name }}!</h1>
+        <p>This website uses Flask, SQLite, and Bootstrap.</p>
+    {% endif %}
 
     <!-- Create Post Form -->
     <div class="card mb-4">
