@@ -106,7 +106,6 @@ def profile_picture(user_id):
     if user and user.ProfilePictureId != None:
         picture = db.session.query(ProfilePicture.id, ProfilePicture.imageData).where(ProfilePicture.id == user.ProfilePictureId).one_or_none()
         if picture.imageData:
-            print(picture.imageData)
             something = io.BytesIO(picture.imageData)
             response = make_response(something, 200)
             response.headers.set('Content-Type', 'image/jpeg')
