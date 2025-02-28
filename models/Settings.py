@@ -12,9 +12,12 @@ class Settings(db.Model):
     User: Mapped["User"] = db.relationship(foreign_keys=[UserId])
 
     DarkMode: Mapped[bool] = db.Column(db.Boolean, default=False)
+    Language: Mapped[str] = db.Column(db.String, default="EN")
 
-    def __init__(self, darkMode=False):
+    def __init__(self, UserId, darkMode=False, Language="EN"):
+        self.UserId = UserId
         self.DarkMode = darkMode
+        self.Language = Language
 
     def __repr__(self):
         return f"<id: {self.id}, user_id: {self.UserId}>"
