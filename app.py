@@ -1,5 +1,4 @@
-import sqlite3
-from flask import render_template, request, redirect, url_for, session, flash
+from flask import render_template, request, redirect, url_for, session
 import os
 import hashlib
 
@@ -9,12 +8,6 @@ from models import *
 
 app.secret_key = os.urandom(24) 
 
-db_path = 'database/db.sqlite'
-
-def get_db_connection():
-    conn = sqlite3.connect(db_path)
-    conn.row_factory = sqlite3.Row
-    return conn
 
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
@@ -106,16 +99,14 @@ def repost(post_id):
 
 @app.route('/profile_picture/<int:user_id>')
 def profile_picture(user_id):
-    conn = get_db_connection()
-    user = conn.execute('SELECT ProfilePicture FROM Users WHERE UUID = ?', (user_id,)).fetchone()
-    conn.close()
 
-    if user and user['ProfilePicture']:
-        conn = get_db_connection()
-        picture = conn.execute('SELECT ImageData FROM ProfilePictures WHERE PictureID = ?', (user['ProfilePicture'],)).fetchone()
-        conn.close()
+    user = db.session.query(User).where(User.id == user_id).one_or_none()
+
+    if user and user.ProfilePictureId != None:
+        picture = db.session.query(ProfilePicture.imageData).where(ProfilePicture.id == user.ProfilePictureId).one_or_none()
         if picture:
-            return (picture['ImageData'], 200, {'Content-Type': 'image/jpeg'})  # or 'image/png'
+            # TODO find a fix
+            return (picture, 200, {'Content-Type', 'image/jpeg'})
     
     # Default profile picture
     return redirect("https://via.placeholder.com/40")  # Change this to your default image path
@@ -126,28 +117,29 @@ def edit_profile():
     if 'user_id' not in session:
         return redirect(url_for('login'))
 
-    conn = get_db_connection()
-    user = conn.execute('SELECT * FROM Users WHERE UUID = ?', (session['user_id'],)).fetchone()
+    
+    user = db.session.query(User).where(User.id == session["user_id"]).one_or_none()
 
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
         profile_picture = request.files.get('profile_picture')
 
-        conn.execute('UPDATE Users SET UserName = ? WHERE UUID = ?', (username, session['user_id']))
-        
+        if username: 
+            user.UserName = username
+
         if password:
             hashed_password = hash_password(password)
-            conn.execute('UPDATE Users SET PasswordHash = ? WHERE UUID = ?', (hashed_password, session['user_id']))
+            user.passwordHash = hashed_password
 
         if profile_picture and profile_picture.filename != '':
             image_data = profile_picture.read()
-            conn.execute('INSERT INTO ProfilePictures (ImageData) VALUES (?)', (image_data,))
-            picture_id = conn.execute('SELECT last_insert_rowid()').fetchone()[0]
-            conn.execute('UPDATE Users SET ProfilePicture = ? WHERE UUID = ?', (picture_id, session['user_id']))
+            profile_pic = ProfilePicture(image_data)
+            db.session.add(profile_pic)
+            db.session.commit()
+            db.session.query(User).where(User.id == session["user_id"]).update({User.ProfilePictureId: profile_pic.id})
 
-        conn.commit()
-        conn.close()
+        db.session.commit()
         
         session['user_name'] = username
         return redirect(url_for('index'))
@@ -159,23 +151,22 @@ def settings():
     if 'user_id' not in session:
         return redirect(url_for('login'))
 
-    conn = get_db_connection()
-    user_settings = conn.execute("SELECT Language FROM Settings WHERE UserID = ?", (session['user_id'],)).fetchone()
+    user_settings = db.session.query(Settings).where(Settings.UserId == session["user_id"]).one_or_none() 
+
+    if user_settings == None:
+        new_settings = Settings(session["user_id"])
+        db.session.add(new_settings)
+        db.session.commit()
+
+    user_settings = db.session.query(Settings).where(Settings.UserId == session["user_id"]).one_or_none() 
 
     if request.method == 'POST':
-        language = request.form['language']
-        
-        if user_settings:
-            conn.execute("UPDATE Settings SET Language = ? WHERE UserID = ?", (language, session['user_id']))
-        else:
-            conn.execute("INSERT INTO Settings (UserID, Language) VALUES (?, ?)", (session['user_id'], language))
+        user_settings.Language = request.form['language']
+        db.session.commit()
 
-        conn.commit()
-        conn.close()
         return redirect(url_for('index'))
 
-    conn.close()
-    return render_template('settings.html', language=user_settings['Language'] if user_settings else 'en')
+    return render_template('settings.html', language=user_settings.Language)
 
 @app.route('/change_language', methods=['POST'])
 def change_language():
@@ -184,12 +175,11 @@ def change_language():
 
     language = request.form['language']
 
-    conn = get_db_connection()
-    conn.execute("UPDATE Settings SET Language = ? WHERE UserID = ?", 
-                 (language, session['user_id']))
-    conn.commit()
-    conn.close()
-    
+    res = db.session.query(Settings).where(Settings.UserId == session["user_id"]).update({Settings.Language: language})
+    if res == 0:
+        new_settings = Settings(session["user_id"], Language=language)
+        db.session.add(new_settings)
+    db.session.commit()
     # Store the selected language in session
     session['language'] = language
 
@@ -200,11 +190,10 @@ def get_user_language():
         return session['language']
 
     if 'user_id' in session:
-        conn = get_db_connection()
-        lang = conn.execute("SELECT Language FROM Settings WHERE UserID = ?", 
-                            (session['user_id'],)).fetchone()
-        conn.close()
-        return lang['Language'] if lang else 'EN'  # Default to English
+        lang = db.session.query(Settings.Language).where(Settings.UserId == session["user_id"]).one_or_none()
+        if lang: session["language"] = lang
+           
+        return session['Language'] if lang else 'EN'  # Default to English
     
     return 'EN'  # Default for guests
 
