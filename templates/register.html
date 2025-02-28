@@ -2,124 +2,124 @@
 <title>Register</title>
 {% endblock %} {% block body %}
 <div class="d-flex p-4 justify-content-center align-items-center">
-  <div class="card shadow w-25 p-4">
-    <ul class="nav nav-pills nav-justified mb-3" id="ex1" role="tablist">
-      <li class="nav-item" role="presentation">
-        <a
-          class="nav-link"
-          id="tab-login"
-          data-toggle="pill"
-          href="{{ url_for('login') }}"
-          role="tab"
-          aria-controls="pills-login"
-          aria-selected="false"
-          >Login</a
-        >
-      </li>
-      <li class="nav-item" role="presentation">
-        <a
-          class="nav-link active"
-          id="tab-register"
-          data-toggle="pill"
-          href="{{ url_for('register') }}"
-          role="tab"
-          aria-controls="pills-register"
-          aria-selected="true"
-          >Register</a
-        >
-      </li>
-    </ul>
+	<div class="card shadow w-25 p-4">
+		<ul class="nav nav-pills nav-justified mb-3" id="ex1" role="tablist">
+			<li class="nav-item" role="presentation">
+				<a
+					class="nav-link"
+					id="tab-login"
+					data-toggle="pill"
+					href="{{ url_for('auth.login') }}"
+					role="tab"
+					aria-controls="pills-login"
+					aria-selected="false"
+					>Login</a
+				>
+			</li>
+			<li class="nav-item" role="presentation">
+				<a
+					class="nav-link active"
+					id="tab-register"
+					data-toggle="pill"
+					href="{{ url_for('auth.register') }}"
+					role="tab"
+					aria-controls="pills-register"
+					aria-selected="true"
+					>Register</a
+				>
+			</li>
+		</ul>
 
-    <div class="tab-content">
-      <div
-        class="tab-pane fade show active"
-        id="pills-login"
-        role="tabpanel"
-        aria-labelledby="tab-login"
-      >
-        <form method="POST">
-          <div class="text-center mb-3">
-            <p>Register with:</p>
-            <button type="button" class="btn btn-outline-primary mx-1">
-              <i class="bi bi-facebook"></i>
-            </button>
-            <button type="button" class="btn btn-outline-danger mx-1">
-              <i class="bi bi-google"></i>
-            </button>
-            <button type="button" class="btn btn-outline-info mx-1">
-              <i class="bi bi-twitter"></i>
-            </button>
-            <button type="button" class="btn btn-outline-dark mx-1">
-              <i class="bi bi-github"></i>
-            </button>
-            <p class="text-center">or:</p>
-          </div>
-          <div class="form-group">
-            <label>Email:</label>
-            <input type="email" name="email" class="form-control" required />
-          </div>
-          <div class="form-group">
-            <label>Username:</label>
-            <input type="text" name="username" class="form-control" required />
-          </div>
-          <label>Password:</label>
-          <div class="input-group mb-3">
-            <input
-              type="password"
-              name="password"
-              class="form-control"
-              required
-            />
-            <span class="input-group-text">
-              <i class="bi bi-eye-slash" id="togglePassword"></i>
-            </span>
-          </div>
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <div class="form-check">
-              <input
-                class="form-check-input"
-                type="checkbox"
-                value=""
-                id="loginCheck"
-                checked
-              />
-              <label class="form-check-label" for="loginCheck">
-                Remember me
-              </label>
-            </div>
-          </div>
-          <div class="d-grid gap-2">
-            <button type="submit" class="btn btn-primary">Register</button>
-          </div>
-          <div class="text-center mt-3">
-            <p class="mt-3 text-center">
-              Already have an account?
-              <a href="{{ url_for('login') }}">Login</a>
-            </p>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
+		<div class="tab-content">
+			<div
+				class="tab-pane fade show active"
+				id="pills-login"
+				role="tabpanel"
+				aria-labelledby="tab-login"
+			>
+				<form method="POST">
+					<div class="text-center mb-3">
+						<p>Register with:</p>
+						<button type="button" class="btn btn-outline-primary mx-1">
+							<i class="bi bi-facebook"></i>
+						</button>
+						<button type="button" class="btn btn-outline-danger mx-1">
+							<i class="bi bi-google"></i>
+						</button>
+						<button type="button" class="btn btn-outline-info mx-1">
+							<i class="bi bi-twitter"></i>
+						</button>
+						<button type="button" class="btn btn-outline-dark mx-1">
+							<i class="bi bi-github"></i>
+						</button>
+						<p class="text-center">or:</p>
+					</div>
+					<div class="form-group">
+						<label>Email:</label>
+						<input type="email" name="email" class="form-control" required />
+					</div>
+					<div class="form-group">
+						<label>Username:</label>
+						<input type="text" name="username" class="form-control" required />
+					</div>
+					<label>Password:</label>
+					<div class="input-group mb-3">
+						<input
+							type="password"
+							name="password"
+							class="form-control"
+							required
+						/>
+						<span class="input-group-text">
+							<i class="bi bi-eye-slash" id="togglePassword"></i>
+						</span>
+					</div>
+					<div class="d-flex justify-content-between align-items-center mb-3">
+						<div class="form-check">
+							<input
+								class="form-check-input"
+								type="checkbox"
+								value=""
+								id="loginCheck"
+								checked
+							/>
+							<label class="form-check-label" for="loginCheck">
+								Remember me
+							</label>
+						</div>
+					</div>
+					<div class="d-grid gap-2">
+						<button type="submit" class="btn btn-primary">Register</button>
+					</div>
+					<div class="text-center mt-3">
+						<p class="mt-3 text-center">
+							Already have an account?
+							<a href="{{ url_for('auth.login') }}">Login</a>
+						</p>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
 </div>
 <script>
-  document.querySelectorAll("input[type='password']").forEach((e) => {
-    e.parentElement
-      .getElementsByClassName("input-group-text")[0]
-      .addEventListener("click", () => {
-        const type =
-          e.getAttribute("type") === "password" ? "text" : "password";
-        e.setAttribute("type", type);
+	document.querySelectorAll("input[type='password']").forEach((e) => {
+		e.parentElement
+			.getElementsByClassName("input-group-text")[0]
+			.addEventListener("click", () => {
+				const type =
+					e.getAttribute("type") === "password" ? "text" : "password";
+				e.setAttribute("type", type);
 
-        e.parentElement
-          .getElementsByClassName("input-group-text")[0]
-          .getElementsByClassName("bi")[0]
-          .classList.toggle("bi-eye");
-        e.parentElement
-          .getElementsByClassName("input-group-text")[0]
-          .getElementsByClassName("bi")[0]
-          .classList.toggle("bi-eye-slash");
-      });
-  });
+				e.parentElement
+					.getElementsByClassName("input-group-text")[0]
+					.getElementsByClassName("bi")[0]
+					.classList.toggle("bi-eye");
+				e.parentElement
+					.getElementsByClassName("input-group-text")[0]
+					.getElementsByClassName("bi")[0]
+					.classList.toggle("bi-eye-slash");
+			});
+	});
 </script>
 {% endblock %}

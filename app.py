@@ -6,17 +6,16 @@ import hashlib
 from sqlalchemy import func
 from setup import app, db
 from models import *
+from blueprints.auth import auth_blueprint
 
 app.secret_key = os.urandom(24) 
 
-
-def hash_password(password):
-    return hashlib.sha256(password.encode()).hexdigest()
+app.register_blueprint(auth_blueprint)
 
 @app.route('/')
 def index():
     if 'user_id' not in session:
-        return redirect(url_for('login'))
+        return redirect(url_for('auth.login'))
 
     posts = db.session.query(Post.id.label("PostID"), Post.Title.label("Title"), Post.Content.label("Content"), User.UserName.label("UserName"), func.count(user_post_likes.c.PostId).label("Likes")) \
         .outerjoin(user_post_likes, user_post_likes.c.PostId == Post.id) \
@@ -29,7 +28,7 @@ def index():
 @app.route('/create_post', methods=['POST'])
 def create_post():
     if 'user_id' not in session:
-        return redirect(url_for('login'))
+        return redirect(url_for('auth.login'))
 
     title = request.form.get('title')
     content = request.form.get('content')
@@ -44,7 +43,7 @@ def create_post():
 @app.route('/like_post/<int:post_id>', methods=['POST'])
 def like_post(post_id):
     if 'user_id' not in session:
-        return redirect(url_for('login'))
+        return redirect(url_for('auth.login'))
     
     existing_like = db.session.query(user_post_likes.c.PostId) \
         .where(user_post_likes.c.PostId == post_id and user_post_likes.c.UserId == session["user_id"]) \
@@ -66,7 +65,7 @@ def like_post(post_id):
 @app.route('/follow/<int:user_id>', methods=['POST'])
 def follow_user(user_id):
     if 'user_id' not in session:
-        return redirect(url_for('login'))
+        return redirect(url_for('auth.login'))
 
 
     existing_follow = db.session.query(following_table.c.UserId) \
@@ -89,7 +88,7 @@ def follow_user(user_id):
 @app.route('/repost/<int:post_id>', methods=['POST'])
 def repost(post_id):
     if 'user_id' not in session:
-        return redirect(url_for('login'))
+        return redirect(url_for('auth.login'))
 
     repost = Post(session["user_id"], None, None, None, post_id)
     db.session.add(repost)
@@ -118,7 +117,7 @@ def profile_picture(user_id):
 @app.route('/edit_profile', methods=['GET', 'POST'])
 def edit_profile():
     if 'user_id' not in session:
-        return redirect(url_for('login'))
+        return redirect(url_for('auth.login'))
 
     
     user = db.session.query(User).where(User.id == session["user_id"]).one_or_none()
@@ -152,7 +151,7 @@ def edit_profile():
 @app.route('/settings', methods=['GET', 'POST'])
 def settings():
     if 'user_id' not in session:
-        return redirect(url_for('login'))
+        return redirect(url_for('auth.login'))
 
     user_settings = db.session.query(Settings).where(Settings.UserId == session["user_id"]).one_or_none() 
 
@@ -174,7 +173,7 @@ def settings():
 @app.route('/change_language', methods=['POST'])
 def change_language():
     if 'user_id' not in session:
-        return redirect(url_for('login'))
+        return redirect(url_for('auth.login'))
 
     language = request.form['language']
 
@@ -199,50 +198,6 @@ def get_user_language():
         return session['Language'] if lang else 'EN'  # Default to English
     
     return 'EN'  # Default for guests
-
-# Login
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        email = request.form['email']
-        password = hash_password(request.form['password'])
-        
-        user = db.session.query(User).filter(User.EmailAdress == email).one_or_none()
-
-        if user and user.passwordHash == password:
-            session["user_id"] = user.id
-            session["user_name"] = user.UserName
-
-            return redirect(url_for('index'))  
-        else:
-            return render_template('login.html', error="Invalid credentials.")
-    
-    return render_template('login.html')
-
-# Register
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    if request.method == 'POST':
-        email = request.form['email']
-        username = request.form['username']
-        password = hash_password(request.form['password'])
-
-        try:
-            new_user = User(password, email, username)
-            db.session.add(new_user)
-            db.session.commit()
-        except:
-            return render_template('register.html', error="Email already in use.")
-
-        return redirect(url_for('login'))
-
-    return render_template('register.html')
-
-# Logout
-@app.route('/logout')
-def logout():
-    session.clear()  
-    return redirect(url_for('login'))  
 
 if __name__ == '__main__':
     app.run(debug=True)

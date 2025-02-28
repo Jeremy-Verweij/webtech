@@ -3,89 +3,89 @@
 <!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"> -->
 {% endblock %} {% block body %}
 <div class="d-flex flex-column vh-100">
-  <div
-    class="header bg-primary text-white p-3 d-flex justify-content-between align-items-center"
-  >
-    <h4>Twitter</h4>
+	<div
+		class="header bg-primary text-white p-3 d-flex justify-content-between align-items-center"
+	>
+		<h4>Twitter</h4>
 
-    <!-- CSS Dropdown Menu -->
-    <div class="dropdown">
-      <button
-        class="btn btn-light btn-secondary dropdown-toggle"
-        type="button"
-        data-bs-toggle="dropdown"
-        aria-expanded="false"
-      >
-        <img
-          src="{{ url_for('profile_picture', user_id=session['user_id']) }}"
-          alt="Profile Picture"
-          class="rounded-circle"
-          width="40"
-          height="40"
-        />
-      </button>
-      <ul class="dropdown-menu">
-        <li>
-          <a class="dropdown-item" href="{{ url_for('index') }}"
-            ><i class="bi bi-person"></i> Profile</a
-          >
-        </li>
-        <li>
-          <a class="dropdown-item" href="{{ url_for('edit_profile') }}"
-            ><i class="bi bi-pencil-square"></i> Edit Profile</a
-          >
-        </li>
-        <li>
-          <a class="dropdown-item" href="{{ url_for('settings') }}"
-            ><i class="bi bi-gear"></i> Settings</a
-          >
-        </li>
-        <li>
-          <a
-            class="dropdown-item"
-            href="{{ url_for('logout') }}"
-            class="text-danger"
-            ><i class="bi bi-box-arrow-right"></i> Logout</a
-          >
-        </li>
-      </ul>
-    </div>
-  </div>
+		<!-- CSS Dropdown Menu -->
+		<div class="dropdown">
+			<button
+				class="btn btn-light btn-secondary dropdown-toggle"
+				type="button"
+				data-bs-toggle="dropdown"
+				aria-expanded="false"
+			>
+				<img
+					src="{{ url_for('profile_picture', user_id=session['user_id']) }}"
+					alt="Profile Picture"
+					class="rounded-circle"
+					width="40"
+					height="40"
+				/>
+			</button>
+			<ul class="dropdown-menu">
+				<li>
+					<a class="dropdown-item" href="{{ url_for('index') }}"
+						><i class="bi bi-person"></i> Profile</a
+					>
+				</li>
+				<li>
+					<a class="dropdown-item" href="{{ url_for('edit_profile') }}"
+						><i class="bi bi-pencil-square"></i> Edit Profile</a
+					>
+				</li>
+				<li>
+					<a class="dropdown-item" href="{{ url_for('settings') }}"
+						><i class="bi bi-gear"></i> Settings</a
+					>
+				</li>
+				<li>
+					<a
+						class="dropdown-item"
+						href="{{ url_for('auth.logout') }}"
+						class="text-danger"
+						><i class="bi bi-box-arrow-right"></i> Logout</a
+					>
+				</li>
+			</ul>
+		</div>
+	</div>
 
-  <div class="d-flex flex-grow-1">
-    <div class="bg-light p-3">
-      <ul class="list-unstyled">
-        <li class="p-3">
-          <a href="{{ url_for('index') }}" class="nav-item"
-            ><i class="bi bi-house"></i> Home</a
-          >
-        </li>
-        <li class="p-3">
-          <a href="{{ url_for('index') }}" class="nav-item"
-            ><i class="bi bi-hash"></i> Explore</a
-          >
-        </li>
-        <li class="p-3">
-          <a href="{{ url_for('index') }}" class="nav-item"
-            ><i class="bi bi-bell"></i> Notifications</a
-          >
-        </li>
-        <li class="p-3">
-          <a href="{{ url_for('index') }}" class="nav-item"
-            ><i class="bi bi-envelope"></i> Messages</a
-          >
-        </li>
-        <li class="p-3">
-          <a href="{{ url_for('index') }}" class="nav-item"
-            ><i class="bi bi-bookmark"></i> Bookmarks</a
-          >
-        </li>
-      </ul>
-    </div>
+	<div class="d-flex flex-grow-1">
+		<div class="bg-light p-3">
+			<ul class="list-unstyled">
+				<li class="p-3">
+					<a href="{{ url_for('index') }}" class="nav-item"
+						><i class="bi bi-house"></i> Home</a
+					>
+				</li>
+				<li class="p-3">
+					<a href="{{ url_for('index') }}" class="nav-item"
+						><i class="bi bi-hash"></i> Explore</a
+					>
+				</li>
+				<li class="p-3">
+					<a href="{{ url_for('index') }}" class="nav-item"
+						><i class="bi bi-bell"></i> Notifications</a
+					>
+				</li>
+				<li class="p-3">
+					<a href="{{ url_for('index') }}" class="nav-item"
+						><i class="bi bi-envelope"></i> Messages</a
+					>
+				</li>
+				<li class="p-3">
+					<a href="{{ url_for('index') }}" class="nav-item"
+						><i class="bi bi-bookmark"></i> Bookmarks</a
+					>
+				</li>
+			</ul>
+		</div>
 
-    <div class="content flex-grow-1 p-3">
-      {% block content %} {% endblock %}
-    </div>
-  </div>
+		<div class="content flex-grow-1 p-3">
+			{% block content %} {% endblock %}
+		</div>
+	</div>
 </div>
 {% endblock %}
