@@ -24,6 +24,27 @@ def index():
 
     return render_template('index.html', user_name=session['user_name'], posts=posts)
 
+@app.route('/profile/<int:user_id>')
+def profile(user_id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    user = db.session.query(User).where(User.id == user_id).one_or_none()
+    posts = db.session.query(Post).where(Post.UserId == user_id).all()
+
+    follower_count = db.session.query(following_table).filter_by(FollowedUserId=user_id).count()
+
+    following_count = db.session.query(following_table).filter_by(UserId=user_id).count()
+
+    following = db.session.query(User).join(following_table, User.id == following_table.c.FollowedUserId).filter(following_table.c.UserId == user_id).all()
+
+    is_following = db.session.query(following_table).filter_by(UserId=session["user_id"], FollowedUserId=user_id).count() > 0
+
+    if not user:
+        return "User not found", 404
+
+    return render_template('profile.html', user=user, posts=posts, follower_count=follower_count, following_count=following_count, following=following, is_following=is_following)
+
 # Create Post
 @app.route('/create_post', methods=['POST'])
 def create_post():
