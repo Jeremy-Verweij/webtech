@@ -7,6 +7,7 @@ from sqlalchemy import func
 from setup import app, db
 from models import *
 from blueprints.auth import auth_blueprint
+from utils.hash_password import hash_password
 
 app.secret_key = os.urandom(24) 
 
