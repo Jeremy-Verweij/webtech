@@ -1,4 +1,5 @@
-from flask import render_template, request, redirect, url_for, session
+import io
+from flask import make_response, render_template, request, redirect, url_for, session
 import os
 import hashlib
 
@@ -103,10 +104,13 @@ def profile_picture(user_id):
     user = db.session.query(User).where(User.id == user_id).one_or_none()
 
     if user and user.ProfilePictureId != None:
-        picture = db.session.query(ProfilePicture.imageData).where(ProfilePicture.id == user.ProfilePictureId).one_or_none()
-        if picture:
-            # TODO find a fix
-            return (picture, 200, {'Content-Type', 'image/jpeg'})
+        picture = db.session.query(ProfilePicture.id, ProfilePicture.imageData).where(ProfilePicture.id == user.ProfilePictureId).one_or_none()
+        if picture.imageData:
+            print(picture.imageData)
+            something = io.BytesIO(picture.imageData)
+            response = make_response(something, 200)
+            response.headers.set('Content-Type', 'image/jpeg')
+            return response
     
     # Default profile picture
     return redirect("https://via.placeholder.com/40")  # Change this to your default image path
