@@ -3,7 +3,7 @@ from flask import make_response, render_template, request, redirect, url_for, se
 import os
 import hashlib
 
-from sqlalchemy import func
+from sqlalchemy import func, and_
 from setup import app, db
 from models import *
 from blueprints.auth import auth_blueprint
@@ -67,13 +67,14 @@ def like_post(post_id):
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
     
-    existing_like = db.session.query(user_post_likes.c.PostId) \
-        .where(user_post_likes.c.PostId == post_id and user_post_likes.c.UserId == session["user_id"]) \
+    existing_like = db.session.query(user_post_likes.c.PostId, user_post_likes.c.UserId) \
+        .where(and_(user_post_likes.c.PostId == post_id, user_post_likes.c.UserId == session["user_id"])) \
         .one_or_none()
     post = db.session.query(Post).where(Post.id == post_id).one_or_none()
     user = db.session.query(User).where(User.id == session["user_id"]).one_or_none()
 
     if existing_like and post:
+        print(existing_like, session["user_id"], post)
         post.likes.remove(user)
         db.session.add(post)
     else:
@@ -91,7 +92,7 @@ def follow_user(user_id):
 
 
     existing_follow = db.session.query(following_table.c.UserId) \
-        .where(following_table.c.FollowedUserId == user_id and following_table.c.UserId == session["user_id"]) \
+        .where(and_(following_table.c.FollowedUserId == user_id, following_table.c.UserId == session["user_id"])) \
         .one_or_none()
     user_to_follow = db.session.query(User).where(User.id == user_id).one_or_none()
     user = db.session.query(User).where(User.id == session["user_id"]).one_or_none()
