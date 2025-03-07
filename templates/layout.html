@@ -53,36 +53,6 @@
 	</div>
 
 	<div class="d-flex flex-grow-1">
-		<div class="bg-light p-3">
-			<ul class="list-unstyled">
-				<li class="p-3">
-					<a href="{{ url_for('index') }}" class="nav-item"
-						><i class="bi bi-house"></i> Home</a
-					>
-				</li>
-				<li class="p-3">
-					<a href="{{ url_for('index') }}" class="nav-item"
-						><i class="bi bi-hash"></i> Explore</a
-					>
-				</li>
-				<li class="p-3">
-					<a href="{{ url_for('index') }}" class="nav-item"
-						><i class="bi bi-bell"></i> Notifications</a
-					>
-				</li>
-				<li class="p-3">
-					<a href="{{ url_for('index') }}" class="nav-item"
-						><i class="bi bi-envelope"></i> Messages</a
-					>
-				</li>
-				<li class="p-3">
-					<a href="{{ url_for('index') }}" class="nav-item"
-						><i class="bi bi-bookmark"></i> Bookmarks</a
-					>
-				</li>
-			</ul>
-		</div>
-
 		<div class="content flex-grow-1 p-3">
 			{% block content %} {% endblock %}
 		</div>
