@@ -44,7 +44,7 @@
     <div class="card-body">
       <div class="d-flex align-items-center">
         <img
-          src="{{ url_for('profile_picture', user_id=session['user_id']) }}"
+          src="{{ url_for('profile_picture', user_id=post.UserID) }}"
           class="rounded-circle"
           width="40"
           height="40"

@@ -18,7 +18,7 @@ def index():
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
 
-    posts = db.session.query(Post.id.label("PostID"), Post.Title.label("Title"), Post.Content.label("Content"), User.UserName.label("UserName"), func.count(user_post_likes.c.PostId).label("Likes")) \
+    posts = db.session.query(Post.id.label("PostID"), Post.UserId.label("UserID"), Post.Title.label("Title"), Post.Content.label("Content"), User.UserName.label("UserName"), func.count(user_post_likes.c.PostId).label("Likes")) \
         .outerjoin(user_post_likes, user_post_likes.c.PostId == Post.id) \
         .join(User, User.id == Post.UserId) \
         .group_by(Post.id).all()
