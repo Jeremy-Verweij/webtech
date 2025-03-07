@@ -134,7 +134,7 @@ def profile_picture(user_id):
             return response
     
     # Default profile picture
-    return redirect("https://via.placeholder.com/40")  # Change this to your default image path
+    return redirect(url_for('static', filename="default_profile.jpg"))  # Change this to your default image path
 
 
 @app.route('/edit_profile', methods=['GET', 'POST'])
