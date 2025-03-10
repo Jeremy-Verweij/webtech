@@ -24,7 +24,9 @@ def index():
     posts = db.session.query(Post.id.label("PostID"), Post.UserId.label("UserID"), Post.Title.label("Title"), Post.Content.label("Content"), User.UserName.label("UserName"), func.count(user_post_likes.c.PostId).label("Likes")) \
         .outerjoin(user_post_likes, user_post_likes.c.PostId == Post.id) \
         .join(User, User.id == Post.UserId) \
-        .group_by(Post.id).all()
+        .group_by(Post.id) \
+        .order_by(Post.creation_date.desc()) \
+        .all()
 
     return render_template('index.html', user_name=session['user_name'], posts=posts)
 
@@ -62,7 +64,23 @@ def create_post():
     db.session.add(new_post)
     db.session.commit()
 
-    return redirect(url_for('index'))
+    post_data = db.session.query(Post.id.label("PostID"), Post.UserId.label("UserID"), Post.Title.label("Title"), Post.Content.label("Content"), User.UserName.label("UserName"), func.count(user_post_likes.c.PostId).label("Likes")) \
+        .outerjoin(user_post_likes, user_post_likes.c.PostId == Post.id) \
+        .join(User, User.id == Post.UserId) \
+        .where(Post.id == new_post.id) \
+        .one_or_none()
+
+    # Update other users there content
+    turbo.push(turbo.prepend(render_template('includes/post.html', user_name=session['user_name'], post=post_data), "posts"))
+
+    # Update current users content(needs to be done this way because otherwise tubo will cry about forms)
+    if turbo.can_stream():
+        return turbo.stream([
+            turbo.prepend(render_template('includes/post.html', user_name=session['user_name'], post=post_data), "posts"),
+            turbo.replace(render_template('includes/new_post.html'), "new_post")
+        ])
+    else:
+        return redirect(url_for('index'))
 
 # Like Post
 @app.route('/like_post/<int:post_id>', methods=['POST'])

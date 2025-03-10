@@ -17,7 +17,6 @@
         action="{{ url_for('like_post', post_id=post['PostID']) }}"
         method="POST"
         class="d-inline"
-        data="{tubo: false}"
       >
         <button type="submit" class="btn btn-sm btn-outline-primary">
           <i class="bi bi-heart"></i> Like ({{ post['Likes'] }})
