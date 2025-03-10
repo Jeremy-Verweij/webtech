@@ -1,13 +1,18 @@
 <div id="post-{{post['PostID']}}" class="card mb-3">
   <div class="card-body">
     <div class="d-flex align-items-center">
-      <img
-        src="{{ url_for('profile_picture', user_id=post.UserID) }}"
-        class="rounded-circle"
-        width="40"
-        height="40"
-      />
-      <h5 class="ml-2">{{ post['UserName'] }}</h5>
+      <a
+        class="text-reset text-decoration-none"
+        href="/profile/{{post.UserID}}"
+      >
+        <img
+          src="{{ url_for('profile_picture', user_id=post.UserID) }}"
+          class="rounded-circle d-inline"
+          width="40"
+          height="40"
+        />&nbsp;
+        <h5 class="ml-2 d-inline">{{ post['UserName'] }}</h5>
+      </a>
     </div>
     <h6 class="mt-2">{{ post['Title'] }}</h6>
     <p>{{ post['Content'] }}</p>

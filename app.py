@@ -30,7 +30,7 @@ def index():
 @app.route('/profile/<int:user_id>')
 def profile(user_id):
     if 'user_id' not in session:
-        return redirect(url_for('login'))
+        return redirect(url_for('auth.login'))
 
     user = db.session.query(User).where(User.id == user_id).one_or_none()
     posts = db.session.query(Post).where(Post.UserId == user_id).all()
@@ -133,11 +133,12 @@ def follow_user(user_id):
         user_to_follow.followers.remove(user)
         db.session.add(user)
     else:
-        user_to_follow.likes.append(user)
+        user_to_follow.followers.append(user)
         db.session.add(user)
     db.session.commit()
 
-    return redirect(url_for('index'))
+    # return ""
+    return redirect('/profile/' + str(user_id))
 
 # Repost
 @app.route('/repost/<int:post_id>', methods=['POST'])
