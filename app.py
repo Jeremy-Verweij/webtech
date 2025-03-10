@@ -1,5 +1,6 @@
 import io
 from flask import make_response, render_template, request, redirect, url_for, session
+from turbo_flask import Turbo
 import os
 import hashlib
 
@@ -12,6 +13,8 @@ from utils.hash_password import hash_password
 app.secret_key = os.urandom(24) 
 
 app.register_blueprint(auth_blueprint)
+
+turbo = Turbo(app)
 
 @app.route('/')
 def index():
@@ -74,15 +77,29 @@ def like_post(post_id):
     user = db.session.query(User).where(User.id == session["user_id"]).one_or_none()
 
     if existing_like and post:
-        print(existing_like, session["user_id"], post)
         post.likes.remove(user)
         db.session.add(post)
     else:
         post.likes.append(user)
         db.session.add(post)
     db.session.commit()
+
+    post_data = db.session.query(Post.id.label("PostID"), Post.UserId.label("UserID"), Post.Title.label("Title"), Post.Content.label("Content"), User.UserName.label("UserName"), func.count(user_post_likes.c.PostId).label("Likes")) \
+        .outerjoin(user_post_likes, user_post_likes.c.PostId == Post.id) \
+        .join(User, User.id == Post.UserId) \
+        .where(Post.id == post_id) \
+        .one_or_none()
     
-    return redirect(url_for('index'))
+    # Update other users there content
+    turbo.push(turbo.replace(render_template('includes/post.html', user_name=session['user_name'], post=post_data), "post-" + str(post_id)))
+
+    # Update current users content(needs to be done this way because otherwise tubo will cry about forms)
+    if turbo.can_stream():
+        return turbo.stream(
+            turbo.replace(render_template('includes/post.html', user_name=session['user_name'], post=post_data), "post-" + str(post_id)),
+        )
+    else:
+        return redirect(url_for('index'))
 
 # Follow/Unfollow User
 @app.route('/follow/<int:user_id>', methods=['POST'])
