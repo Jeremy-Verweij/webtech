@@ -1,11 +1,10 @@
 import io
 from flask import make_response, render_template, request, redirect, url_for, session
-from turbo_flask import Turbo
 import os
 import hashlib
 
 from sqlalchemy import func, and_
-from setup import app, db
+from setup import app, db, turbo
 from models import *
 from blueprints.auth import auth_blueprint
 from utils.hash_password import hash_password
@@ -13,8 +12,6 @@ from utils.hash_password import hash_password
 app.secret_key = os.urandom(24) 
 
 app.register_blueprint(auth_blueprint)
-
-turbo = Turbo(app)
 
 @app.route('/')
 def index():

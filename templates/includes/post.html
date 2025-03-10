@@ -1,37 +1,37 @@
 <div id="post-{{post['PostID']}}" class="card mb-3">
-    <div class="card-body">
-      <div class="d-flex align-items-center">
-        <img
-          src="{{ url_for('profile_picture', user_id=post.UserID) }}"
-          class="rounded-circle"
-          width="40"
-          height="40"
-        />
-        <h5 class="ml-2">{{ post['UserName'] }}</h5>
-      </div>
-      <h6 class="mt-2">{{ post['Title'] }}</h6>
-      <p>{{ post['Content'] }}</p>
-
-      <!-- Like Button -->
-      <form
-        action="{{ url_for('like_post', post_id=post['PostID']) }}"
-        method="POST"
-        class="d-inline"
-      >
-        <button type="submit" class="btn btn-sm btn-outline-primary">
-          <i class="bi bi-heart"></i> Like ({{ post['Likes'] }})
-        </button>
-      </form>
-
-      <!-- Repost Button -->
-      <form
-        action="{{ url_for('repost', post_id=post['PostID']) }}"
-        method="POST"
-        class="d-inline"
-      >
-        <button type="submit" class="btn btn-sm btn-outline-secondary">
-          <i class="bi bi-repeat"></i> Repost
-        </button>
-      </form>
+  <div class="card-body">
+    <div class="d-flex align-items-center">
+      <img
+        src="{{ url_for('profile_picture', user_id=post.UserID) }}"
+        class="rounded-circle"
+        width="40"
+        height="40"
+      />
+      <h5 class="ml-2">{{ post['UserName'] }}</h5>
     </div>
+    <h6 class="mt-2">{{ post['Title'] }}</h6>
+    <p>{{ post['Content'] }}</p>
+
+    <!-- Like Button -->
+    <form
+      action="{{ url_for('like_post', post_id=post['PostID']) }}"
+      method="POST"
+      class="d-inline"
+    >
+      <button type="submit" class="btn btn-sm btn-outline-primary">
+        <i class="bi bi-heart"></i> Like ({{ post['Likes'] }})
+      </button>
+    </form>
+
+    <!-- Repost Button -->
+    <form
+      action="{{ url_for('repost', post_id=post['PostID']) }}"
+      method="POST"
+      class="d-inline"
+    >
+      <button type="submit" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-repeat"></i> Repost
+      </button>
+    </form>
+  </div>
 </div>
