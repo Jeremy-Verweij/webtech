@@ -218,8 +218,12 @@ def settings():
         user_settings.Language = request.form['language']
         db.session.commit()
         return redirect(url_for('settings'))
+    
+    
+    if 'language' not in session:
+        session['language'] = default_lang
 
-    return render_template('settings.html', language=user_settings.Language, user_settings=user_settings)
+    return render_template('settings.html', language=user_settings.Language, user_settings=user_settings, lang=get_lang(session['language']), available_lang=get_all_lang())
 
 
 
