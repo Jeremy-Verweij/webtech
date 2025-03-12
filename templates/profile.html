@@ -5,7 +5,7 @@
     <div class="col-md-8">
       <div class="card">
         <div class="card-header text-center">
-          <h3>{{ user.UserName }}'s Profile</h3>
+          <h3>{{ user.UserName }}{{lang['profile_profile_name_append']}}</h3>
         </div>
         <div class="card-body text-center">
           <img
@@ -17,11 +17,14 @@
           />
 
           <h4 class="mt-3">{{ user.UserName }}</h4>
-          <p><strong>Email:</strong> {{ user.EmailAdress }}</p>
+          <p>
+            <strong>{{lang['profile_email']}}:</strong> {{ user.EmailAdress }}
+          </p>
 
           <p>
-            <strong>Followers:</strong> {{ follower_count }} |
-            <strong>Following:</strong> {{ following_count }}
+            <strong>{{lang['profile_followers']}}:</strong> {{ follower_count }}
+            | <strong>{{lang['profile_following']}}:</strong> {{ following_count
+            }}
           </p>
 
           {% if user.id != session['user_id'] %}
@@ -40,22 +43,24 @@
       </div>
 
       <div class="mt-4">
-        <h4>Recent Posts</h4>
+        <h4>{{lang['profile_recent_posts']}}</h4>
         {% for post in posts %}
         <div class="card mt-3">
           <div class="card-body">
             <h5>{{ post.Title }}</h5>
             <p>{{ post.Content }}</p>
-            <small class="text-muted">Likes: {{ post.Likes }}</small>
+            <small class="text-muted"
+              >{{lang['profile_likes']}}: {{ post.Likes }}</small
+            >
           </div>
         </div>
         {% else %}
-        <p class="text-muted">No posts yet.</p>
+        <p class="text-muted">{{lang['profile_no_posts']}}</p>
         {% endfor %}
       </div>
 
       <div class="mt-4">
-        <h4>Following</h4>
+        <h4>{{lang['profile_following']}}</h4>
         {% for followed in following %}
         <div class="card mt-2">
           <div class="card-body d-flex justify-content-between">
@@ -75,7 +80,7 @@
           </div>
         </div>
         {% else %}
-        <p class="text-muted">Not following anyone.</p>
+        <p class="text-muted">{{lang['profile_no_following']}}</p>
         {% endfor %}
       </div>
     </div>

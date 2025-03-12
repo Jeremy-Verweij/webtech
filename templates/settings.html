@@ -2,15 +2,18 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h2>Settings</h2>
-    
-    <!-- Language Selection -->
+    <h2>{{lang['settings']}}</h2>
     <form action="{{ url_for('change_language') }}" method="POST" class="form-inline">
-        <label for="language">Select Language</label>
+        <label for="language">{{lang['settings_select_lang']}}</label>
         <select name="language" class="form-control" onchange="this.form.submit()">
+            {% for a_lang in available_lang%}
+                <option value="{{a_lang}}" {% if session['language'] == '{{a_lang}}' %}selected{% endif %}>{{a_lang}}</option>
+            {% endfor %}
+            <!--
             <option value="EN" {% if session['language'] == 'EN' %}selected{% endif %}>English</option>
             <option value="NL" {% if session['language'] == 'NL' %}selected{% endif %}>Nederlands</option>
             <option value="FR" {% if session['language'] == 'FR' %}selected{% endif %}>Français</option>
+            -->
         </select>
     </form>
 

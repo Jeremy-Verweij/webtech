@@ -1,13 +1,13 @@
 import io
 from flask import make_response, render_template, request, redirect, url_for, session
 import os
-import hashlib
 
 from sqlalchemy import func, and_
 from setup import app, db
 from models import *
 from blueprints.auth import auth_blueprint
 from utils.hash_password import hash_password
+from utils.lang import get_lang, get_all_lang, default_lang
 
 app.secret_key = os.urandom(24) 
 
@@ -17,6 +17,9 @@ app.register_blueprint(auth_blueprint)
 def index():
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
+    
+    if 'language' not in session:
+        session['language'] = default_lang
 
     user_settings = db.session.query(Settings).where(Settings.UserId == session["user_id"]).one_or_none()
 
@@ -30,7 +33,7 @@ def index():
         .join(User, User.id == Post.UserId) \
         .group_by(Post.id).all()
 
-    return render_template('index.html', user_name=session['user_name'], posts=posts)
+    return render_template('index.html', user_name=session['user_name'], posts=posts, lang=get_lang(session['language']))
 
 @app.route('/profile/<int:user_id>')
 def profile(user_id):
@@ -50,8 +53,11 @@ def profile(user_id):
 
     if not user:
         return "User not found", 404
+    
+    if 'language' not in session:
+        session['language'] = default_lang
 
-    return render_template('profile.html', user=user, posts=posts, follower_count=follower_count, following_count=following_count, following=following, is_following=is_following)
+    return render_template('profile.html', user=user, posts=posts, follower_count=follower_count, following_count=following_count, following=following, is_following=is_following, lang=get_lang(session['language']))
 
 # Create Post
 @app.route('/create_post', methods=['POST'])
@@ -189,7 +195,10 @@ def edit_profile():
         session['user_name'] = username
         return redirect(url_for('index'))
 
-    return render_template('edit_profile.html', user=user)
+    if 'language' not in session:
+        session['language'] = default_lang
+
+    return render_template('edit_profile.html', user=user, lang=get_lang(session['language']))
 
 @app.route('/settings', methods=['GET', 'POST'])
 def settings():
@@ -232,6 +241,10 @@ def toggle_dark_mode():
 
     return redirect(url_for('settings')) 
 
+    if 'language' not in session:
+        session['language'] = default_lang
+
+    return render_template('settings.html', language=user_settings.Language, available_lang=get_all_lang(), lang=get_lang(session['language']))
 
 @app.route('/change_language', methods=['POST'])
 def change_language():
@@ -255,11 +268,11 @@ def get_user_language():
 
     if 'user_id' in session:
         lang = db.session.query(Settings.Language).where(Settings.UserId == session["user_id"]).one_or_none()
-        if lang: 
-            session["language"] = lang
-        return session['Language'] if lang else 'EN'  
+        if lang: session["language"] = lang
+           
+        return session['Language'] if lang else default_lang  # Default to English
     
-    return 'EN'  
+    return default_lang  # Default for guests
 
 if __name__ == '__main__':
     app.run(debug=True)
