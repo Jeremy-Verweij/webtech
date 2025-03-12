@@ -42,8 +42,8 @@ def index():
             Repost.Content.label('RepostContent'), \
             func.count(user_post_likes.c.PostId).label("Likes")) \
         .outerjoin(user_post_likes, user_post_likes.c.PostId == Post.id) \
+        .outerjoin(Repost, Repost.id == Post.RepostId)\
         .join(User, User.id == Post.UserId) \
-        .join(Repost, Repost.id == Post.RepostId)\
         .order_by(Post.creation_date.desc()) \
         .group_by(Post.id) \
         .all()
