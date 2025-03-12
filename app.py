@@ -18,12 +18,17 @@ def index():
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
 
+    user_settings = db.session.query(Settings).where(Settings.UserId == session["user_id"]).one_or_none()
+
+    if user_settings:
+        session['dark_mode'] = user_settings.DarkMode
+    else:
+        session['dark_mode'] = False
+
     posts = db.session.query(Post.id.label("PostID"), Post.UserId.label("UserID"), Post.Title.label("Title"), Post.Content.label("Content"), User.UserName.label("UserName"), func.count(user_post_likes.c.PostId).label("Likes")) \
         .outerjoin(user_post_likes, user_post_likes.c.PostId == Post.id) \
         .join(User, User.id == Post.UserId) \
-        .group_by(Post.id) \
-        .order_by(Post.creation_date.desc()) \
-        .all()
+        .group_by(Post.id).all()
 
     return render_template('index.html', user_name=session['user_name'], posts=posts)
 
@@ -191,22 +196,42 @@ def settings():
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
 
-    user_settings = db.session.query(Settings).where(Settings.UserId == session["user_id"]).one_or_none() 
+    user_settings = db.session.query(Settings).where(Settings.UserId == session["user_id"]).one_or_none()
 
-    if user_settings == None:
-        new_settings = Settings(session["user_id"])
-        db.session.add(new_settings)
+    if user_settings is None:
+        user_settings = Settings(session["user_id"])
+        db.session.add(user_settings)
         db.session.commit()
 
-    user_settings = db.session.query(Settings).where(Settings.UserId == session["user_id"]).one_or_none() 
+    session['dark_mode'] = user_settings.DarkMode
 
     if request.method == 'POST':
         user_settings.Language = request.form['language']
         db.session.commit()
+        return redirect(url_for('settings'))
 
-        return redirect(url_for('index'))
+    return render_template('settings.html', language=user_settings.Language, user_settings=user_settings)
 
-    return render_template('settings.html', language=user_settings.Language)
+
+
+@app.route('/toggle_dark_mode', methods=['POST'])
+def toggle_dark_mode():
+    if 'user_id' not in session:
+        return redirect(url_for('auth.login'))
+
+    user_settings = db.session.query(Settings).where(Settings.UserId == session["user_id"]).one_or_none()
+    if not user_settings:
+        user_settings = Settings(session["user_id"])
+        db.session.add(user_settings)
+        db.session.commit()
+
+    user_settings.DarkMode = not user_settings.DarkMode
+    db.session.commit()
+
+    session['dark_mode'] = user_settings.DarkMode
+
+    return redirect(url_for('settings')) 
+
 
 @app.route('/change_language', methods=['POST'])
 def change_language():
@@ -220,7 +245,6 @@ def change_language():
         new_settings = Settings(session["user_id"], Language=language)
         db.session.add(new_settings)
     db.session.commit()
-    # Store the selected language in session
     session['language'] = language
 
     return redirect(url_for('index'))
@@ -231,11 +255,11 @@ def get_user_language():
 
     if 'user_id' in session:
         lang = db.session.query(Settings.Language).where(Settings.UserId == session["user_id"]).one_or_none()
-        if lang: session["language"] = lang
-           
-        return session['Language'] if lang else 'EN'  # Default to English
+        if lang: 
+            session["language"] = lang
+        return session['Language'] if lang else 'EN'  
     
-    return 'EN'  # Default for guests
+    return 'EN'  
 
 if __name__ == '__main__':
     app.run(debug=True)
