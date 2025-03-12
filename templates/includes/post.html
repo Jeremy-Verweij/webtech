@@ -18,8 +18,12 @@
       {% endwith %}
     </div>
 
-    {% if post['RepostTitle'] %} {% include "includes/repost.html" %} {% endif
-    %}
+    {% if post['RepostTitle'] %}
+    <div class="card-body border border-3 m-3">
+      <h6 class="mt-2">{{ post['RepostTitle'] }}</h6>
+      <p>{{ post['RepostContent'] }}</p>
+    </div>
+    {% endif %}
 
     <h6 class="mt-2">{{ post['Title'] }}</h6>
     <p>{{ post['Content'] }}</p>
@@ -36,14 +40,17 @@
     </form>
 
     <!-- Repost Button -->
-    <form
-      action="{{ url_for('repost', post_id=post['PostID']) }}"
-      method="POST"
-      class="d-inline"
+    <!-- Uses a small bit of js(onclick) to set the right url for the modal(popup) 
+     It basically gets the form from the dom and then it sets the action to the correct url
+    -->
+    <button
+      type="button"
+      class="btn btn-sm btn-outline-secondary"
+      data-bs-toggle="modal"
+      data-bs-target="#repostModal"
+      onclick="document.getElementById('repostForm').action='{{ url_for('repost', post_id=post['PostID']) }}'"
     >
-      <button type="submit" class="btn btn-sm btn-outline-secondary">
-        <i class="bi bi-repeat"></i> {{lang['post_repost']}}
-      </button>
-    </form>
+      <i class="bi bi-repeat"></i> {{lang['post_repost']}}
+    </button>
   </div>
 </div>

@@ -1,4 +1,5 @@
 {
+  "lang": "Nederlands",
   "welcome_title": "Welkom",
   "welcome_sub_title": "Deze website gebruikt Flask, SQLite, en Bootstrap.",
   "edit_profile_form_user_name": "Gebruikers naam",
@@ -24,5 +25,6 @@
   "header_profile": "Profiel",
   "header_edit_profile": "Profiel Bewerken",
   "header_settings": "Instellingen",
-  "header_logout": "Uitloggen"
+  "header_logout": "Uitloggen",
+  "repost_close": "Sluiten"
 }

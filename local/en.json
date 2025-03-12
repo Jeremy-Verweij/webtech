@@ -1,4 +1,5 @@
 {
+  "lang": "English",
   "welcome_title": "Welcome",
   "welcome_sub_title": "This website uses Flask, SQLite, and Bootstrap.",
   "edit_profile_form_user_name": "Username",
@@ -24,5 +25,6 @@
   "header_profile": "Profile",
   "header_edit_profile": "Edit Profile",
   "header_settings": "Settings",
-  "header_logout": "Logout"
+  "header_logout": "Logout",
+  "repost_close": "Close"
 }

@@ -8,7 +8,7 @@ from setup import app, db
 from models import *
 from blueprints.auth import auth_blueprint
 from utils.hash_password import hash_password
-from utils.lang import get_lang, get_all_lang, default_lang
+from utils.lang import get_lang, lang_names, default_lang
 
 app.secret_key = os.urandom(24) 
 
@@ -140,8 +140,11 @@ def follow_user(user_id):
 def repost(post_id):
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
+    
+    title = request.form.get('title')
+    content = request.form.get('content')
 
-    repost = Post(session["user_id"], None, None, None, post_id)
+    repost = Post(session["user_id"], title, content, None, post_id)
     db.session.add(repost)
     db.session.commit()
 
@@ -225,7 +228,7 @@ def settings():
     if 'language' not in session:
         session['language'] = default_lang
 
-    return render_template('settings.html', language=user_settings.Language, user_settings=user_settings, lang=get_lang(session['language']), available_lang=get_all_lang())
+    return render_template('settings.html', language=user_settings.Language, user_settings=user_settings, lang=get_lang(session['language']), available_lang=lang_names)
 
 
 
