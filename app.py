@@ -3,6 +3,7 @@ from flask import make_response, render_template, request, redirect, url_for, se
 import os
 
 from sqlalchemy import func, and_
+from sqlalchemy.orm import aliased
 from setup import app, db
 from models import *
 from blueprints.auth import auth_blueprint
@@ -27,11 +28,25 @@ def index():
         session['dark_mode'] = user_settings.DarkMode
     else:
         session['dark_mode'] = False
-
-    posts = db.session.query(Post.id.label("PostID"), Post.UserId.label("UserID"), Post.Title.label("Title"), Post.Content.label("Content"), User.UserName.label("UserName"), func.count(user_post_likes.c.PostId).label("Likes")) \
+        
+    Repost = aliased(Post)
+        
+    posts = db.session.query(\
+            Post.id.label("PostID"), \
+            Post.UserId.label("UserID"), \
+            Post.Title.label("Title"), \
+            Post.Content.label("Content"), \
+            Post.creation_date.label("Date"), \
+            User.UserName.label("UserName"), \
+            Repost.Title.label('RepostTitle'), \
+            Repost.Content.label('RepostContent'), \
+            func.count(user_post_likes.c.PostId).label("Likes")) \
         .outerjoin(user_post_likes, user_post_likes.c.PostId == Post.id) \
         .join(User, User.id == Post.UserId) \
-        .group_by(Post.id).all()
+        .join(Repost, Repost.id == Post.RepostId)\
+        .order_by(Post.creation_date.desc()) \
+        .group_by(Post.id) \
+        .all()
 
     return render_template('index.html', user_name=session['user_name'], posts=posts, lang=get_lang(session['language']))
 
@@ -72,12 +87,6 @@ def create_post():
     db.session.add(new_post)
     db.session.commit()
 
-    post_data = db.session.query(Post.id.label("PostID"), Post.UserId.label("UserID"), Post.Title.label("Title"), Post.Content.label("Content"), User.UserName.label("UserName"), func.count(user_post_likes.c.PostId).label("Likes")) \
-        .outerjoin(user_post_likes, user_post_likes.c.PostId == Post.id) \
-        .join(User, User.id == Post.UserId) \
-        .where(Post.id == new_post.id) \
-        .one_or_none()
-
     return redirect(url_for('index'))
 
 # Like Post
@@ -99,13 +108,6 @@ def like_post(post_id):
         post.likes.append(user)
         db.session.add(post)
     db.session.commit()
-
-    post_data = db.session.query(Post.id.label("PostID"), Post.UserId.label("UserID"), Post.Title.label("Title"), Post.Content.label("Content"), User.UserName.label("UserName"), func.count(user_post_likes.c.PostId).label("Likes")) \
-        .outerjoin(user_post_likes, user_post_likes.c.PostId == Post.id) \
-        .join(User, User.id == Post.UserId) \
-        .where(Post.id == post_id) \
-        .one_or_none()
-    
 
     return redirect(url_for('index'))
 
@@ -244,11 +246,6 @@ def toggle_dark_mode():
     session['dark_mode'] = user_settings.DarkMode
 
     return redirect(url_for('settings')) 
-
-    if 'language' not in session:
-        session['language'] = default_lang
-
-    return render_template('settings.html', language=user_settings.Language, available_lang=get_all_lang(), lang=get_lang(session['language']))
 
 @app.route('/change_language', methods=['POST'])
 def change_language():
