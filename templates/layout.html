@@ -26,7 +26,7 @@
 			</button>
 			<ul class="dropdown-menu">
 				<li>
-					<a class="dropdown-item" href="{{ url_for('index') }}"
+					<a class="dropdown-item" href="{{ url_for('profile', user_id=session.get('user_id')) }}"
 						><i class="bi bi-person"></i> Profile</a
 					>
 				</li>
