@@ -4,7 +4,7 @@
       type="text"
       class="form-control"
       name="title"
-      placeholder="Post Title"
+      placeholder="{{lang['new_post_title']}}"
       required
     />
   </div>
@@ -13,9 +13,11 @@
       class="form-control"
       name="content"
       rows="3"
-      placeholder="What's on your mind?"
+      placeholder="{{lang['new_post_content']}}"
       required
     ></textarea>
   </div>
-  <button type="submit" class="btn btn-primary my-2">Post</button>
+  <button type="submit" class="btn btn-primary my-2">
+    {{lang['new_post_post']}}
+  </button>
 </form>

@@ -8,7 +8,7 @@
   >
     <!-- Username -->
     <div class="form-group">
-      <label for="username">Username</label>
+      <label for="username">{{lang['edit_profile_form_user_name']}}</label>
       <input
         type="text"
         class="form-control my-2"
@@ -21,7 +21,7 @@
 
     <!-- Password -->
     <div class="form-group">
-      <label for="password">New Password (Optional)</label>
+      <label for="password">{{lang['edit_profile_form_password']}}</label>
       <input
         type="password"
         class="form-control my-2"
@@ -33,7 +33,7 @@
     <!-- Profile Picture -->
     <div class="input-group my-2">
       <label class="input-group-text text-bg-primary" for="inputGroupFile01"
-        >Profile Picture</label
+        >{{lang['edit_profile_form_picture']}}</label
       >
       <input
         type="file"
@@ -44,8 +44,12 @@
       />
     </div>
 
-    <button type="submit" class="btn btn-primary my-2">Save Changes</button>
-    <a href="{{ url_for('index') }}" class="btn btn-secondary">Cancel</a>
+    <button type="submit" class="btn btn-primary my-2">
+      {{lang['edit_profile_form_save']}}
+    </button>
+    <a href="{{ url_for('index') }}" class="btn btn-secondary"
+      >{{lang['edit_profile_form_cancel']}}</a
+    >
   </form>
 </div>
 {% endblock %}
