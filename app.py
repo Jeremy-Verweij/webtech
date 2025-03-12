@@ -4,7 +4,7 @@ import os
 import hashlib
 
 from sqlalchemy import func, and_
-from setup import app, db, turbo
+from setup import app, db
 from models import *
 from blueprints.auth import auth_blueprint
 from utils.hash_password import hash_password
@@ -67,17 +67,7 @@ def create_post():
         .where(Post.id == new_post.id) \
         .one_or_none()
 
-    # Update other users there content
-    turbo.push(turbo.prepend(render_template('includes/post.html', user_name=session['user_name'], post=post_data), "posts"))
-
-    # Update current users content(needs to be done this way because otherwise tubo will cry about forms)
-    if turbo.can_stream():
-        return turbo.stream([
-            turbo.prepend(render_template('includes/post.html', user_name=session['user_name'], post=post_data), "posts"),
-            turbo.replace(render_template('includes/new_post.html'), "new_post")
-        ])
-    else:
-        return redirect(url_for('index'))
+    return redirect(url_for('index'))
 
 # Like Post
 @app.route('/like_post/<int:post_id>', methods=['POST'])
@@ -105,16 +95,8 @@ def like_post(post_id):
         .where(Post.id == post_id) \
         .one_or_none()
     
-    # Update other users there content
-    turbo.push(turbo.replace(render_template('includes/post.html', user_name=session['user_name'], post=post_data), "post-" + str(post_id)))
 
-    # Update current users content(needs to be done this way because otherwise tubo will cry about forms)
-    if turbo.can_stream():
-        return turbo.stream(
-            turbo.replace(render_template('includes/post.html', user_name=session['user_name'], post=post_data), "post-" + str(post_id)),
-        )
-    else:
-        return redirect(url_for('index'))
+    return redirect(url_for('index'))
 
 # Follow/Unfollow User
 @app.route('/follow/<int:user_id>', methods=['POST'])

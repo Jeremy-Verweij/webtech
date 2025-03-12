@@ -4,12 +4,10 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from sqlalchemy import MetaData
-from turbo_flask import Turbo
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 app = Flask(__name__)
-turbo = Turbo(app)
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(
     basedir, "database/db_alchemy_test.sqlite"
