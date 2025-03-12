@@ -5,19 +5,18 @@ class Settings(db.Model):
     __tablename__ = "settings"
 
     id: Mapped[int] = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    UserId: Mapped[int] = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    
+    # Correct relationship definition
+    User: Mapped["User"] = db.relationship("User", backref="settings")
 
-    UserId: Mapped[int] = db.Column(
-        db.Integer, db.ForeignKey("users.id"), nullable=False
-    )
-    User: Mapped["User"] = db.relationship(foreign_keys=[UserId])
+    DarkMode: Mapped[bool] = db.Column(db.Boolean, default=False, nullable=False)
+    Language: Mapped[str] = db.Column(db.String, default="EN", nullable=False)
 
-    DarkMode: Mapped[bool] = db.Column(db.Boolean, default=False)
-    Language: Mapped[str] = db.Column(db.String, default="EN")
-
-    def __init__(self, UserId, darkMode=False, Language="EN"):
+    def __init__(self, UserId, DarkMode=False, Language="EN"):  # Fixed darkMode -> DarkMode
         self.UserId = UserId
-        self.DarkMode = darkMode
+        self.DarkMode = DarkMode
         self.Language = Language
 
     def __repr__(self):
-        return f"<id: {self.id}, user_id: {self.UserId}>"
+        return f"<Settings id={self.id}, user_id={self.UserId}, DarkMode={self.DarkMode}, Language={self.Language}>"

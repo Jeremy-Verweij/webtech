@@ -1,82 +1,16 @@
 {% extends 'layout.html' %} {% block content %}
 <div class="container mt-4">
-  {% if session['language'] == 'NL' %}
-  <h1>Welkom {{ user_name }}!</h1>
-  <p>Deze website maakt gebruik van Flask, SQLite en Bootstrap.</p>
-  {% elif session['language'] == 'FR' %}
-  <h1>Bienvenue {{ user_name }}!</h1>
-  <p>Ce site Web utilise Flask, SQLite et Bootstrap.</p>
-  {% else %}
-  <h1>Welcome {{ user_name }}!</h1>
-  <p>This website uses Flask, SQLite, and Bootstrap.</p>
-  {% endif %}
+  <h1>{{lang['welcome_title']}} {{ user_name }}!</h1>
+  <p>{{lang['welcome_sub_title']}}</p>
 
   <!-- Create Post Form -->
   <div class="card mb-4">
-    <div class="card-body">
-      <form action="{{ url_for('create_post') }}" method="POST">
-        <div class="form-group my-2">
-          <input
-            type="text"
-            class="form-control"
-            name="title"
-            placeholder="Post Title"
-            required
-          />
-        </div>
-        <div class="form-group my-2">
-          <textarea
-            class="form-control"
-            name="content"
-            rows="3"
-            placeholder="What's on your mind?"
-            required
-          ></textarea>
-        </div>
-        <button type="submit" class="btn btn-primary my-2">Post</button>
-      </form>
-    </div>
+    <div class="card-body">{% include 'includes/new_post.html' %}</div>
   </div>
 
   <!-- Posts Feed -->
-  {% for post in posts %}
-  <div class="card mb-3">
-    <div class="card-body">
-      <div class="d-flex align-items-center">
-        <img
-          src="{{ url_for('profile_picture', user_id=post.UserID) }}"
-          class="rounded-circle"
-          width="40"
-          height="40"
-        />
-        <h5 class="ml-2">{{ post['UserName'] }}</h5>
-      </div>
-      <h6 class="mt-2">{{ post['Title'] }}</h6>
-      <p>{{ post['Content'] }}</p>
-
-      <!-- Like Button -->
-      <form
-        action="{{ url_for('like_post', post_id=post['PostID']) }}"
-        method="POST"
-        class="d-inline"
-      >
-        <button type="submit" class="btn btn-sm btn-outline-primary">
-          <i class="bi bi-heart"></i> Like ({{ post['Likes'] }})
-        </button>
-      </form>
-
-      <!-- Repost Button -->
-      <form
-        action="{{ url_for('repost', post_id=post['PostID']) }}"
-        method="POST"
-        class="d-inline"
-      >
-        <button type="submit" class="btn btn-sm btn-outline-secondary">
-          <i class="bi bi-repeat"></i> Repost
-        </button>
-      </form>
-    </div>
+  <div id="posts">
+    {% for post in posts %} {% include 'includes/post.html' %} {% endfor %}
   </div>
-  {% endfor %}
 </div>
 {% endblock %}

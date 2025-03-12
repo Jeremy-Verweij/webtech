@@ -1,61 +1,79 @@
 {% extends 'boiler_plate.html' %} {% block header %}
 <title>Web App</title>
 <!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"> -->
+<style>
+  body.dark-mode {
+    background-color: #121212;
+    color: white;
+  }
+  .dark-mode .card {
+    background-color: #333;
+    color: white;
+  }
+</style>
 {% endblock %} {% block body %}
-<div class="d-flex flex-column vh-100">
-	<div
-		class="header bg-primary text-white p-3 d-flex justify-content-between align-items-center"
-	>
-		<h4>Twitter</h4>
+<body class="{{ 'dark-mode' if session.get('dark_mode') else '' }}">
+  <div class="d-flex flex-column vh-100">
+    <div
+      class="header bg-primary text-white p-3 d-flex justify-content-between align-items-center"
+    >
+      <a class="text-white text-decoration-none" href="{{ url_for('index') }}"
+        ><h4>Twitter</h4></a
+      >
 
-		<!-- CSS Dropdown Menu -->
-		<div class="dropdown">
-			<button
-				class="btn btn-light btn-secondary dropdown-toggle"
-				type="button"
-				data-bs-toggle="dropdown"
-				aria-expanded="false"
-			>
-				<img
-					src="{{ url_for('profile_picture', user_id=session['user_id']) }}"
-					alt="Profile Picture"
-					class="rounded-circle"
-					width="40"
-					height="40"
-				/>
-			</button>
-			<ul class="dropdown-menu">
-				<li>
-					<a class="dropdown-item" href="{{ url_for('profile', user_id=session.get('user_id')) }}"
-						><i class="bi bi-person"></i> Profile</a
-					>
-				</li>
-				<li>
-					<a class="dropdown-item" href="{{ url_for('edit_profile') }}"
-						><i class="bi bi-pencil-square"></i> Edit Profile</a
-					>
-				</li>
-				<li>
-					<a class="dropdown-item" href="{{ url_for('settings') }}"
-						><i class="bi bi-gear"></i> Settings</a
-					>
-				</li>
-				<li>
-					<a
-						class="dropdown-item"
-						href="{{ url_for('auth.logout') }}"
-						class="text-danger"
-						><i class="bi bi-box-arrow-right"></i> Logout</a
-					>
-				</li>
-			</ul>
-		</div>
-	</div>
+      <!-- CSS Dropdown Menu -->
+      <div class="dropdown">
+        <button
+          class="btn btn-light btn-secondary dropdown-toggle"
+          type="button"
+          data-bs-toggle="dropdown"
+          aria-expanded="false"
+        >
+          <img
+            src="{{ url_for('profile_picture', user_id=session['user_id']) }}"
+            alt="Profile Picture"
+            class="rounded-circle"
+            width="40"
+            height="40"
+          />
+        </button>
+        <ul class="dropdown-menu">
+          <li>
+            <a
+              class="dropdown-item"
+              href="{{ url_for('profile', user_id=session.get('user_id')) }}"
+              ><i class="bi bi-person"></i> {{lang['header_profile']}}</a
+            >
+          </li>
+          <li>
+            <a class="dropdown-item" href="{{ url_for('edit_profile') }}"
+              ><i class="bi bi-pencil-square"></i>
+              {{lang['header_edit_profile']}}</a
+            >
+          </li>
+          <li>
+            <a class="dropdown-item" href="{{ url_for('settings') }}"
+              ><i class="bi bi-gear"></i> {{lang['header_settings']}}</a
+            >
+          </li>
+          <li>
+            <a
+              class="dropdown-item"
+              href="{{ url_for('auth.logout') }}"
+              class="text-danger"
+              ><i class="bi bi-box-arrow-right"></i>
+              {{lang['header_logout']}}</a
+            >
+          </li>
+        </ul>
+      </div>
+    </div>
 
-	<div class="d-flex flex-grow-1">
-		<div class="content flex-grow-1 p-3">
-			{% block content %} {% endblock %}
-		</div>
-	</div>
-</div>
+    <div class="d-flex flex-grow-1">
+      <div class="content flex-grow-1 p-3">
+        {% block content %} {% endblock %}
+      </div>
+    </div>
+  </div>
+</body>
 {% endblock %}

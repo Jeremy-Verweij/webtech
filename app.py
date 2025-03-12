@@ -1,13 +1,13 @@
 import io
 from flask import make_response, render_template, request, redirect, url_for, session
 import os
-import hashlib
 
 from sqlalchemy import func, and_
 from setup import app, db
 from models import *
 from blueprints.auth import auth_blueprint
 from utils.hash_password import hash_password
+from utils.lang import get_lang, get_all_lang, default_lang
 
 app.secret_key = os.urandom(24) 
 
@@ -17,18 +17,28 @@ app.register_blueprint(auth_blueprint)
 def index():
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
+    
+    if 'language' not in session:
+        session['language'] = default_lang
+
+    user_settings = db.session.query(Settings).where(Settings.UserId == session["user_id"]).one_or_none()
+
+    if user_settings:
+        session['dark_mode'] = user_settings.DarkMode
+    else:
+        session['dark_mode'] = False
 
     posts = db.session.query(Post.id.label("PostID"), Post.UserId.label("UserID"), Post.Title.label("Title"), Post.Content.label("Content"), User.UserName.label("UserName"), func.count(user_post_likes.c.PostId).label("Likes")) \
         .outerjoin(user_post_likes, user_post_likes.c.PostId == Post.id) \
         .join(User, User.id == Post.UserId) \
         .group_by(Post.id).all()
 
-    return render_template('index.html', user_name=session['user_name'], posts=posts)
+    return render_template('index.html', user_name=session['user_name'], posts=posts, lang=get_lang(session['language']))
 
 @app.route('/profile/<int:user_id>')
 def profile(user_id):
     if 'user_id' not in session:
-        return redirect(url_for('login'))
+        return redirect(url_for('auth.login'))
 
     user = db.session.query(User).where(User.id == user_id).one_or_none()
     posts = db.session.query(Post).where(Post.UserId == user_id).all()
@@ -43,8 +53,11 @@ def profile(user_id):
 
     if not user:
         return "User not found", 404
+    
+    if 'language' not in session:
+        session['language'] = default_lang
 
-    return render_template('profile.html', user=user, posts=posts, follower_count=follower_count, following_count=following_count, following=following, is_following=is_following)
+    return render_template('profile.html', user=user, posts=posts, follower_count=follower_count, following_count=following_count, following=following, is_following=is_following, lang=get_lang(session['language']))
 
 # Create Post
 @app.route('/create_post', methods=['POST'])
@@ -58,6 +71,12 @@ def create_post():
     new_post = Post(session["user_id"], title, content)
     db.session.add(new_post)
     db.session.commit()
+
+    post_data = db.session.query(Post.id.label("PostID"), Post.UserId.label("UserID"), Post.Title.label("Title"), Post.Content.label("Content"), User.UserName.label("UserName"), func.count(user_post_likes.c.PostId).label("Likes")) \
+        .outerjoin(user_post_likes, user_post_likes.c.PostId == Post.id) \
+        .join(User, User.id == Post.UserId) \
+        .where(Post.id == new_post.id) \
+        .one_or_none()
 
     return redirect(url_for('index'))
 
@@ -74,14 +93,20 @@ def like_post(post_id):
     user = db.session.query(User).where(User.id == session["user_id"]).one_or_none()
 
     if existing_like and post:
-        print(existing_like, session["user_id"], post)
         post.likes.remove(user)
         db.session.add(post)
     else:
         post.likes.append(user)
         db.session.add(post)
     db.session.commit()
+
+    post_data = db.session.query(Post.id.label("PostID"), Post.UserId.label("UserID"), Post.Title.label("Title"), Post.Content.label("Content"), User.UserName.label("UserName"), func.count(user_post_likes.c.PostId).label("Likes")) \
+        .outerjoin(user_post_likes, user_post_likes.c.PostId == Post.id) \
+        .join(User, User.id == Post.UserId) \
+        .where(Post.id == post_id) \
+        .one_or_none()
     
+
     return redirect(url_for('index'))
 
 # Follow/Unfollow User
@@ -101,11 +126,12 @@ def follow_user(user_id):
         user_to_follow.followers.remove(user)
         db.session.add(user)
     else:
-        user_to_follow.likes.append(user)
+        user_to_follow.followers.append(user)
         db.session.add(user)
     db.session.commit()
 
-    return redirect(url_for('index'))
+    # return ""
+    return redirect('/profile/' + str(user_id))
 
 # Repost
 @app.route('/repost/<int:post_id>', methods=['POST'])
@@ -169,29 +195,60 @@ def edit_profile():
         session['user_name'] = username
         return redirect(url_for('index'))
 
-    return render_template('edit_profile.html', user=user)
+    if 'language' not in session:
+        session['language'] = default_lang
+
+    return render_template('edit_profile.html', user=user, lang=get_lang(session['language']))
 
 @app.route('/settings', methods=['GET', 'POST'])
 def settings():
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
 
-    user_settings = db.session.query(Settings).where(Settings.UserId == session["user_id"]).one_or_none() 
+    user_settings = db.session.query(Settings).where(Settings.UserId == session["user_id"]).one_or_none()
 
-    if user_settings == None:
-        new_settings = Settings(session["user_id"])
-        db.session.add(new_settings)
+    if user_settings is None:
+        user_settings = Settings(session["user_id"])
+        db.session.add(user_settings)
         db.session.commit()
 
-    user_settings = db.session.query(Settings).where(Settings.UserId == session["user_id"]).one_or_none() 
+    session['dark_mode'] = user_settings.DarkMode
 
     if request.method == 'POST':
         user_settings.Language = request.form['language']
         db.session.commit()
+        return redirect(url_for('settings'))
+    
+    
+    if 'language' not in session:
+        session['language'] = default_lang
 
-        return redirect(url_for('index'))
+    return render_template('settings.html', language=user_settings.Language, user_settings=user_settings, lang=get_lang(session['language']), available_lang=get_all_lang())
 
-    return render_template('settings.html', language=user_settings.Language)
+
+
+@app.route('/toggle_dark_mode', methods=['POST'])
+def toggle_dark_mode():
+    if 'user_id' not in session:
+        return redirect(url_for('auth.login'))
+
+    user_settings = db.session.query(Settings).where(Settings.UserId == session["user_id"]).one_or_none()
+    if not user_settings:
+        user_settings = Settings(session["user_id"])
+        db.session.add(user_settings)
+        db.session.commit()
+
+    user_settings.DarkMode = not user_settings.DarkMode
+    db.session.commit()
+
+    session['dark_mode'] = user_settings.DarkMode
+
+    return redirect(url_for('settings')) 
+
+    # if 'language' not in session:
+    #     session['language'] = default_lang
+
+    # return render_template('settings.html', language=user_settings.Language, available_lang=get_all_lang(), lang=get_lang(session['language']))
 
 @app.route('/change_language', methods=['POST'])
 def change_language():
@@ -205,7 +262,6 @@ def change_language():
         new_settings = Settings(session["user_id"], Language=language)
         db.session.add(new_settings)
     db.session.commit()
-    # Store the selected language in session
     session['language'] = language
 
     return redirect(url_for('index'))
@@ -218,9 +274,9 @@ def get_user_language():
         lang = db.session.query(Settings.Language).where(Settings.UserId == session["user_id"]).one_or_none()
         if lang: session["language"] = lang
            
-        return session['Language'] if lang else 'EN'  # Default to English
+        return session['Language'] if lang else default_lang  # Default to English
     
-    return 'EN'  # Default for guests
+    return default_lang  # Default for guests
 
 if __name__ == '__main__':
     app.run(debug=True)
