@@ -245,10 +245,10 @@ def toggle_dark_mode():
 
     return redirect(url_for('settings')) 
 
-    # if 'language' not in session:
-    #     session['language'] = default_lang
+    if 'language' not in session:
+        session['language'] = default_lang
 
-    # return render_template('settings.html', language=user_settings.Language, available_lang=get_all_lang(), lang=get_lang(session['language']))
+    return render_template('settings.html', language=user_settings.Language, available_lang=get_all_lang(), lang=get_lang(session['language']))
 
 @app.route('/change_language', methods=['POST'])
 def change_language():
