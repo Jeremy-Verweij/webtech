@@ -2,7 +2,7 @@ import io
 from flask import make_response, render_template, request, redirect, url_for, session
 import os
 
-from sqlalchemy import func, and_, select, update
+from sqlalchemy import func, and_, update
 from sqlalchemy.orm import aliased
 from setup import app, db
 from models import *
@@ -98,6 +98,7 @@ def comments(post_id):
     .where(Post.ParentPostId == post_id) \
     .join(User, User.id == Post.UserId) \
     .outerjoin(user_post_likes, user_post_likes.c.PostId == Post.id) \
+    .group_by(Post.id) \
     .order_by(Post.creation_date.desc()) \
     .all()
     

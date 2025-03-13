@@ -1,15 +1,14 @@
 {% extends 'layout.html' %} {% block content %}
 <div class="d-flex flex-column h-100">
+  {% macro load_comment(comment) %}
+  <div class="card mb-3 p-3">
+    {% include "/includes/comment.html" %} {% for c in comment.children
+    %}{{load_comment(c)}}{% endfor %}
+  </div>
+  {% endmacro %}
   <div class="overflow-y-scroll d-flex flex-column flex-grow-1">
-    {% include "includes/post.html" %} {% macro load_comment(comment) %}
-
-    <div class="card mb-3 p-3">
-      {% include "/includes/comment.html" %} {% for c in comment.children
-      %}{{load_comment(c)}}{% endfor %}
-    </div>
-
-    {% endmacro %}
-    <div class="container mt-4 p-0" id="comments-{{post.PostID}}">
+    {% include "includes/post.html" %}
+    <div class="mt-4 p-0" id="comments-{{post.PostID}}">
       {% for comment in comments %} {{load_comment(comment)}} {% endfor %}
     </div>
   </div>
