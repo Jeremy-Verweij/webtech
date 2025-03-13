@@ -98,6 +98,7 @@ def comments(post_id):
     .where(Post.ParentPostId == post_id) \
     .join(User, User.id == Post.UserId) \
     .outerjoin(user_post_likes, user_post_likes.c.PostId == Post.id) \
+    .order_by(Post.creation_date.desc()) \
     .all()
     
     return render_template('comments.html', post=post, show_extra_buttons=False, comments=comments, lang=get_lang(session['language']))
