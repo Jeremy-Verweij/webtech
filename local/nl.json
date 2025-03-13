@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
     "welcome_title": "Welkom",
     "welcome_sub_title": "Deze website gebruikt Flask, SQLite, en Bootstrap.",
     "edit_profile_form_user_name": "Gebruikers naam",
@@ -26,3 +27,36 @@
     "header_settings": "Instellingen",
     "header_logout": "Uitloggen"
   }
+=======
+  "lang": "Nederlands",
+  "welcome_title": "Welkom",
+  "welcome_sub_title": "Deze website gebruikt Flask, SQLite, en Bootstrap.",
+  "edit_profile_form_user_name": "Gebruikers naam",
+  "edit_profile_form_password": "Nieuw Wachtwoord (Niet verplicht)",
+  "edit_profile_form_save": "Opslaan",
+  "edit_profile_form_cancel": "Annuleren",
+  "edit_profile_form_picture": "Profiel Foto",
+  "settings_select_lang": "Selecteer Taal",
+  "settings": "Instellingen",
+  "profile_profile_name_append": "'s Profiel",
+  "profile_followers": "Volgers",
+  "profile_following": "Volgend",
+  "profile_email": "Email",
+  "profile_recent_posts": "Recente Posts",
+  "profile_likes": "Houdt van",
+  "profile_no_posts": "Nog niks gepost.",
+  "profile_no_following": "Volgd nog niemand.",
+  "new_post_post": "Post",
+  "new_post_title": "Post Titel",
+  "new_post_content": "Waar denk je aan?",
+  "post_like": "Houden Van",
+  "post_delete": "Verwijderen",
+  "post_deleted": "Verwijdert",
+  "post_repost": "Opnieuw Posten",
+  "header_profile": "Profiel",
+  "header_edit_profile": "Profiel Bewerken",
+  "header_settings": "Instellingen",
+  "header_logout": "Uitloggen",
+  "repost_close": "Sluiten"
+}
+>>>>>>> 167550775bf80f725de96bb853c691f59527f37d

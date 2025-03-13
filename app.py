@@ -2,12 +2,13 @@ import io
 from flask import make_response, render_template, request, redirect, url_for, session
 import os
 
-from sqlalchemy import func, and_
+from sqlalchemy import func, and_, update
+from sqlalchemy.orm import aliased
 from setup import app, db
 from models import *
 from blueprints.auth import auth_blueprint
 from utils.hash_password import hash_password
-from utils.lang import get_lang, get_all_lang, default_lang
+from utils.lang import get_lang, lang_names, default_lang
 
 app.secret_key = os.urandom(24) 
 
@@ -27,11 +28,32 @@ def index():
         session['dark_mode'] = user_settings.DarkMode
     else:
         session['dark_mode'] = False
-
-    posts = db.session.query(Post.id.label("PostID"), Post.UserId.label("UserID"), Post.Title.label("Title"), Post.Content.label("Content"), User.UserName.label("UserName"), func.count(user_post_likes.c.PostId).label("Likes")) \
+        
+    Repost = aliased(Post)
+    RepostUser = aliased(User)
+    user_repost_likes = aliased(user_post_likes)
+        
+    posts = db.session.query(\
+            Post.id.label("PostID"), \
+            Post.UserId.label("UserID"), \
+            Post.Title.label("Title"), \
+            Post.Content.label("Content"), \
+            Post.creation_date.label("Date"), \
+            User.UserName.label("UserName"), \
+            func.count(user_post_likes.c.PostId).label("Likes"), \
+            Repost.Title.label('RepostTitle'), \
+            Repost.Content.label('RepostContent'), \
+            Repost.UserId.label('RepostUserId'), \
+            Repost.creation_date.label('RepostDate'), \
+            RepostUser.UserName.label('RepostUserName')) \
         .outerjoin(user_post_likes, user_post_likes.c.PostId == Post.id) \
+        .outerjoin(Repost, Repost.id == Post.RepostId)\
+        .outerjoin(RepostUser, RepostUser.id == Repost.UserId) \
         .join(User, User.id == Post.UserId) \
-        .group_by(Post.id).all()
+        .order_by(Post.creation_date.desc()) \
+        .where(Post.ParentPostId == None) \
+        .group_by(Post.id, Repost.id) \
+        .all()
 
     return render_template('index.html', user_name=session['user_name'], posts=posts, lang=get_lang(session['language']))
 
@@ -41,7 +63,7 @@ def profile(user_id):
         return redirect(url_for('auth.login'))
 
     user = db.session.query(User).where(User.id == user_id).one_or_none()
-    posts = db.session.query(Post).where(Post.UserId == user_id).all()
+    posts = db.session.query(Post).where(Post.UserId == user_id).order_by(Post.creation_date.desc()).all()
 
     follower_count = db.session.query(following_table).filter_by(FollowedUserId=user_id).count()
 
@@ -72,12 +94,6 @@ def create_post():
     db.session.add(new_post)
     db.session.commit()
 
-    post_data = db.session.query(Post.id.label("PostID"), Post.UserId.label("UserID"), Post.Title.label("Title"), Post.Content.label("Content"), User.UserName.label("UserName"), func.count(user_post_likes.c.PostId).label("Likes")) \
-        .outerjoin(user_post_likes, user_post_likes.c.PostId == Post.id) \
-        .join(User, User.id == Post.UserId) \
-        .where(Post.id == new_post.id) \
-        .one_or_none()
-
     return redirect(url_for('index'))
 
 # Like Post
@@ -100,13 +116,16 @@ def like_post(post_id):
         db.session.add(post)
     db.session.commit()
 
-    post_data = db.session.query(Post.id.label("PostID"), Post.UserId.label("UserID"), Post.Title.label("Title"), Post.Content.label("Content"), User.UserName.label("UserName"), func.count(user_post_likes.c.PostId).label("Likes")) \
-        .outerjoin(user_post_likes, user_post_likes.c.PostId == Post.id) \
-        .join(User, User.id == Post.UserId) \
-        .where(Post.id == post_id) \
-        .one_or_none()
-    
+    return redirect(url_for('index'))
 
+@app.route('/delete_post/<int:post_id>', methods=['POST'])
+def delete_post(post_id):
+    if 'user_id' not in session:
+        return redirect(url_for('auth.login'))
+    
+    db.session.execute(update(Post).where(and_(Post.id == post_id, session['user_id'] == Post.UserId)).values({Post.Title: None, Post.Content: None, Post.RepostId: None}))
+    db.session.commit()
+    
     return redirect(url_for('index'))
 
 # Follow/Unfollow User
@@ -138,8 +157,11 @@ def follow_user(user_id):
 def repost(post_id):
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
+    
+    title = request.form.get('title')
+    content = request.form.get('content')
 
-    repost = Post(session["user_id"], None, None, None, post_id)
+    repost = Post(session["user_id"], title, content, None, post_id)
     db.session.add(repost)
     db.session.commit()
 
@@ -223,7 +245,7 @@ def settings():
     if 'language' not in session:
         session['language'] = default_lang
 
-    return render_template('settings.html', language=user_settings.Language, user_settings=user_settings, lang=get_lang(session['language']), available_lang=get_all_lang())
+    return render_template('settings.html', language=user_settings.Language, user_settings=user_settings, lang=get_lang(session['language']), available_lang=lang_names)
 
 
 
@@ -244,11 +266,6 @@ def toggle_dark_mode():
     session['dark_mode'] = user_settings.DarkMode
 
     return redirect(url_for('settings')) 
-
-    if 'language' not in session:
-        session['language'] = default_lang
-
-    return render_template('settings.html', language=user_settings.Language, available_lang=get_all_lang(), lang=get_lang(session['language']))
 
 @app.route('/change_language', methods=['POST'])
 def change_language():

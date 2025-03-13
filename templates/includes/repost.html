@@ -1,0 +1,57 @@
+<div
+  class="modal fade"
+  id="repostModal"
+  tabindex="-1"
+  aria-labelledby="repostModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="repostModalLabel">
+          {{lang['post_repost']}}
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <form id="repostForm" action="" method="POST" class="d-inline">
+        <div class="modal-body">
+          <div class="form-group my-2">
+            <input
+              type="text"
+              class="form-control"
+              name="title"
+              placeholder="{{lang['new_post_title']}}"
+              required
+            />
+          </div>
+          <div class="form-group my-2">
+            <textarea
+              class="form-control"
+              name="content"
+              rows="3"
+              placeholder="{{lang['new_post_content']}}"
+              required
+            ></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+          >
+            {{lang['repost_close']}}
+          </button>
+          <button type="submit" class="btn btn-primary">
+            {{lang['post_repost']}}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

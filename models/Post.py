@@ -5,11 +5,10 @@ from sqlalchemy.orm import Mapped
 from setup import db
 from .Like import user_post_likes
 
-
 class Post(db.Model):
     __tablename__ = "posts"
 
-    id: Mapped[int] = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id: Mapped[int] = db.mapped_column(db.Integer, primary_key=True, autoincrement=True)
     Title: Mapped[str] = db.Column(db.String(50))
     Content: Mapped[str] = db.Column(db.Text)
     creation_date: Mapped[datetime] = db.Column(db.DateTime, server_default=func.now())
@@ -17,18 +16,17 @@ class Post(db.Model):
     UserId: Mapped[int] = db.Column(
         db.Integer, db.ForeignKey("users.id"), nullable=False
     )
-    User: Mapped["User"] = db.relationship(
-        back_populates="posts", foreign_keys=[UserId]
-    )
+    # User: Mapped["User"] = db.relationship(
+    #     back_populates="posts", foreign_keys=[UserId]
+    # )
 
     ParentPostId: Mapped[int] = db.Column(db.Integer, db.ForeignKey("posts.id"))
 
     comments: Mapped[List["Post"]] = db.relationship(foreign_keys=[ParentPostId])
 
-    RepostId: Mapped[int] = db.Column(db.Integer, db.ForeignKey("posts.id"))
-    Repost: Mapped["Post"] = db.relationship(foreign_keys=[RepostId], remote_side=[id])
+    RepostId: Mapped[int] = db.mapped_column(db.Integer, db.ForeignKey("posts.id"))
 
-    likes: Mapped[List["User"]] = db.relationship(
+    likes: Mapped[List["User"]] = db.relationship( # type: ignore
         "User", secondary=user_post_likes, back_populates="liked_posts"
     )
 

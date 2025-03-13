@@ -1,4 +1,5 @@
 {
+  "lang": "English",
   "welcome_title": "Welcome",
   "welcome_sub_title": "This website uses Flask, SQLite, and Bootstrap.",
   "edit_profile_form_user_name": "Username",
@@ -20,9 +21,12 @@
   "new_post_title": "Post Title",
   "new_post_content": "What's on your mind?",
   "post_like": "Like",
+  "post_delete": "Delete",
+  "post_deleted": "Deleted",
   "post_repost": "Repost",
   "header_profile": "Profile",
   "header_edit_profile": "Edit Profile",
   "header_settings": "Settings",
-  "header_logout": "Logout"
+  "header_logout": "Logout",
+  "repost_close": "Close"
 }
