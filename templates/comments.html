@@ -3,7 +3,7 @@
   <div class="overflow-y-scroll d-flex flex-column flex-grow-1">
     {% include "includes/post.html" %} {% macro load_comment(comment) %}
 
-    <div class="ps-4">
+    <div class="card mb-3 px-4 pt-3">
       {% include "/includes/comment.html" %} {% for c in comment.children
       %}{{load_comment(c)}}{% endfor %}
     </div>

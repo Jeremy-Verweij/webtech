@@ -14,7 +14,8 @@
         />&nbsp;
         <h5 class="ml-2 d-inline">{{ post['UserName'] }}</h5>
       </a>
-      {% with date = post['Date'].strftime("%x")%}
+      {% with date = post['Date'].strftime("%x") + " " + post['Date'].strftime("%H")
+      + ":" + post['Date'].strftime("%M")%}
       <span class="ml-2 text-end flex-fill">{{ date }} </span>
       {% endwith %}
     </div>

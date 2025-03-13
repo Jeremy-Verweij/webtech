@@ -1,18 +1,17 @@
+<div class="d-flex mb-2">
+  <a class="text-reset text-decoration-none" href="/profile/{{comment.UserID}}">
+    <img
+      src="{{ url_for('profile_picture', user_id=comment.UserID) }}"
+      class="rounded-circle d-inline"
+      width="40"
+      height="40"
+    />&nbsp;
+    <h5 class="ml-2 d-inline">{{ comment['UserName'] }}</h5>
+  </a>
+  {% with date = comment['Date'].strftime("%x") + " " +
+  comment['Date'].strftime("%H") + ":" + comment['Date'].strftime("%M")%}
+  <span class="ml-2 text-end flex-fill">{{ date }} </span>
+  {% endwith %}
+</div>
+
 <p>{{comment.Content}}</p>
-<form
-  action="{{url_for('create_comment', post_id=comment.CommentID)}}"
-  method="post"
->
-  <div class="input-group">
-    <input
-      type="text"
-      class="form-control d-inline"
-      name="content"
-      placeholder="{{lang['new_comment_content']}}"
-      required
-    />
-    <button type="submit" class="btn btn-primary d-inline px-4">
-      {{lang['new_post_post']}}
-    </button>
-  </div>
-</form>

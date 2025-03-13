@@ -88,13 +88,17 @@ def comments(post_id):
         .group_by(Post.id, Repost.id) \
         .one_or_none()
 
-    comments1 = db.session.query(\
+    comments = db.session.query(\
         Post.id.label("CommentID"), \
+        Post.creation_date.label("Date"), \
+        Post.UserId.label("UserID"), \
+        User.UserName.label("UserName"), \
         Post.Content.label("Content")) \
     .where(Post.ParentPostId == post_id) \
+    .join(User, User.id == Post.UserId) \
     .all()
     
-    return render_template('comments.html', post=post, show_extra_buttons=False, comments=comments1, lang=get_lang(session['language']))
+    return render_template('comments.html', post=post, show_extra_buttons=False, comments=comments, lang=get_lang(session['language']))
 
 @app.route('/profile/<int:user_id>')
 def profile(user_id):
