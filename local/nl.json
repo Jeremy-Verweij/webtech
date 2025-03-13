@@ -23,10 +23,12 @@
   "post_like": "Houden Van",
   "post_delete": "Verwijderen",
   "post_deleted": "Verwijdert",
+  "post_comments": "Reacties",
   "post_repost": "Opnieuw Posten",
   "header_profile": "Profiel",
   "header_edit_profile": "Profiel Bewerken",
   "header_settings": "Instellingen",
   "header_logout": "Uitloggen",
-  "repost_close": "Sluiten"
+  "repost_close": "Sluiten",
+  "new_comment_content": "Jouw antwoord"
 }

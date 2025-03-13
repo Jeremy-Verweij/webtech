@@ -23,10 +23,12 @@
   "post_like": "Like",
   "post_delete": "Delete",
   "post_deleted": "Deleted",
+  "post_comments": "Comments",
   "post_repost": "Repost",
   "header_profile": "Profile",
   "header_edit_profile": "Edit Profile",
   "header_settings": "Settings",
   "header_logout": "Logout",
-  "repost_close": "Close"
+  "repost_close": "Close",
+  "new_comment_content": "Your response"
 }
