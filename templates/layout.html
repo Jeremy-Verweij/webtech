@@ -12,7 +12,9 @@
   }
 </style>
 {% endblock %} {% block body %}
-<body class="{{ 'dark-mode' if session.get('dark_mode') else '' }}">
+<body
+  class="overflow-hidden {{ 'dark-mode' if session.get('dark_mode') else '' }}"
+>
   <div class="d-flex flex-column vh-100">
     <div
       class="header bg-primary text-white p-3 d-flex justify-content-between align-items-center"
@@ -69,7 +71,7 @@
       </div>
     </div>
 
-    <div class="d-flex flex-grow-1">
+    <div class="d-flex flex-grow-1 overflow-auto">
       <div class="content flex-grow-1 p-3">
         {% block content %} {% endblock %}
       </div>

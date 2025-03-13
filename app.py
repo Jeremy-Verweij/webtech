@@ -51,6 +51,7 @@ def index():
         .outerjoin(RepostUser, RepostUser.id == Repost.UserId) \
         .join(User, User.id == Post.UserId) \
         .order_by(Post.creation_date.desc()) \
+        .where(Post.ParentPostId == None) \
         .group_by(Post.id, Repost.id) \
         .all()
 
@@ -62,7 +63,7 @@ def profile(user_id):
         return redirect(url_for('auth.login'))
 
     user = db.session.query(User).where(User.id == user_id).one_or_none()
-    posts = db.session.query(Post).where(Post.UserId == user_id).all()
+    posts = db.session.query(Post).where(Post.UserId == user_id).order_by(Post.creation_date.desc()).all()
 
     follower_count = db.session.query(following_table).filter_by(FollowedUserId=user_id).count()
 

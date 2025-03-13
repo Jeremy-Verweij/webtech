@@ -44,7 +44,8 @@
 
       <div class="mt-4">
         <h4>{{lang['profile_recent_posts']}}</h4>
-        {% for post in posts %}
+        {% for post in posts %} {% if post.Title != None and post.Content !=
+        None and post.Title != "" and post.Content != "" %}
         <div class="card mt-3">
           <div class="card-body">
             <h5>{{ post.Title }}</h5>
@@ -54,7 +55,7 @@
             >
           </div>
         </div>
-        {% else %}
+        {% endif %} {% else %}
         <p class="text-muted">{{lang['profile_no_posts']}}</p>
         {% endfor %}
       </div>
@@ -62,7 +63,7 @@
       <div class="mt-4">
         <h4>{{lang['profile_following']}}</h4>
         {% for followed in following %}
-        <div class="card mt-2">
+        <div class="card mb-2">
           <div class="card-body d-flex justify-content-between">
             <a
               href="{{ url_for('profile', user_id=followed.id) }}"
