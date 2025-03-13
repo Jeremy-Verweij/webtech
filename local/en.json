@@ -21,6 +21,8 @@
   "new_post_title": "Post Title",
   "new_post_content": "What's on your mind?",
   "post_like": "Like",
+  "post_delete": "Delete",
+  "post_deleted": "Deleted",
   "post_repost": "Repost",
   "header_profile": "Profile",
   "header_edit_profile": "Edit Profile",

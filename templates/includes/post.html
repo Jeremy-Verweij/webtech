@@ -14,19 +14,49 @@
         <h5 class="ml-2 d-inline">{{ post['UserName'] }}</h5>
       </a>
       {% with date = post['Date'].strftime("%x")%}
-      <span class="ml-2 text-end flex-fill"> &nbsp;{{ date }} </span>
+      <span class="ml-2 text-end flex-fill">{{ date }} </span>
       {% endwith %}
     </div>
 
     {% if post['RepostTitle'] %}
     <div class="card-body border border-3 m-3">
-      <h6 class="mt-2">{{ post['RepostTitle'] }}</h6>
-      <p>{{ post['RepostContent'] }}</p>
-    </div>
-    {% endif %}
+      <div class="d-flex">
+        <a
+          class="text-reset text-decoration-none"
+          href="/profile/{{post.RepostUserId}}"
+        >
+          <img
+            src="{{ url_for('profile_picture', user_id=post.RepostUserId) }}"
+            class="rounded-circle d-inline"
+            width="40"
+            height="40"
+          />&nbsp;
+          <h5 class="ml-2 d-inline">{{ post['RepostUserName'] }}</h5>
+        </a>
+        {% with date = post['RepostDate'].strftime("%x")%}
+        <span class="nl-2 text-end flex-fill">{{date}}</span>
+        {% endwith %}
+      </div>
 
+      {% if post['RepostTitle'] == None %}
+      <h6 class="mt-2">{{lang['post_deleted']}}</h6>
+      {% else %}
+      <h6 class="mt-2">{{ post['RepostTitle'] }}</h6>
+      {% endif %} {% if post['RepostContent'] == None %}
+      <p>{{lang['post_deleted']}}</p>
+      {% else %}
+      <p>{{ post['RepostContent'] }}</p>
+      {% endif %}
+    </div>
+    {% endif %} {% if post['Title'] == None %}
+    <h6 class="mt-2">{{lang['post_deleted']}}</h6>
+    {% else %}
     <h6 class="mt-2">{{ post['Title'] }}</h6>
+    {% endif %} {% if post['Content'] == None %}
+    <p>{{lang['post_deleted']}}</p>
+    {% else %}
     <p>{{ post['Content'] }}</p>
+    {% endif %}
 
     <!-- Like Button -->
     <form
@@ -34,7 +64,7 @@
       method="POST"
       class="d-inline"
     >
-      <button type="submit" class="btn btn-sm btn-outline-primary">
+      <button type="submit" class="btn btn-sm btn-outline-primary border-2">
         <i class="bi bi-heart"></i> {{lang['post_like']}} ({{ post['Likes'] }})
       </button>
     </form>
@@ -45,12 +75,24 @@
     -->
     <button
       type="button"
-      class="btn btn-sm btn-outline-secondary"
+      class="btn btn-sm btn-outline-secondary border-2"
       data-bs-toggle="modal"
       data-bs-target="#repostModal"
       onclick="document.getElementById('repostForm').action='{{ url_for('repost', post_id=post['PostID']) }}'"
     >
       <i class="bi bi-repeat"></i> {{lang['post_repost']}}
     </button>
+
+    {% if session['user_id'] == post.UserID %}
+    <form
+      action="{{ url_for('delete_post', post_id=post['PostID']) }}"
+      method="POST"
+      class="d-inline"
+    >
+      <button type="submit" class="btn btn-sm btn-outline-danger border-2">
+        <i class="bi bi-trash"></i> {{lang['post_delete']}}
+      </button>
+    </form>
+    {% endif %}
   </div>
 </div>

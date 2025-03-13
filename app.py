@@ -2,7 +2,7 @@ import io
 from flask import make_response, render_template, request, redirect, url_for, session
 import os
 
-from sqlalchemy import func, and_
+from sqlalchemy import func, and_, update
 from sqlalchemy.orm import aliased
 from setup import app, db
 from models import *
@@ -30,6 +30,8 @@ def index():
         session['dark_mode'] = False
         
     Repost = aliased(Post)
+    RepostUser = aliased(User)
+    user_repost_likes = aliased(user_post_likes)
         
     posts = db.session.query(\
             Post.id.label("PostID"), \
@@ -38,14 +40,18 @@ def index():
             Post.Content.label("Content"), \
             Post.creation_date.label("Date"), \
             User.UserName.label("UserName"), \
+            func.count(user_post_likes.c.PostId).label("Likes"), \
             Repost.Title.label('RepostTitle'), \
             Repost.Content.label('RepostContent'), \
-            func.count(user_post_likes.c.PostId).label("Likes")) \
+            Repost.UserId.label('RepostUserId'), \
+            Repost.creation_date.label('RepostDate'), \
+            RepostUser.UserName.label('RepostUserName')) \
         .outerjoin(user_post_likes, user_post_likes.c.PostId == Post.id) \
         .outerjoin(Repost, Repost.id == Post.RepostId)\
+        .outerjoin(RepostUser, RepostUser.id == Repost.UserId) \
         .join(User, User.id == Post.UserId) \
         .order_by(Post.creation_date.desc()) \
-        .group_by(Post.id) \
+        .group_by(Post.id, Repost.id) \
         .all()
 
     return render_template('index.html', user_name=session['user_name'], posts=posts, lang=get_lang(session['language']))
@@ -109,6 +115,16 @@ def like_post(post_id):
         db.session.add(post)
     db.session.commit()
 
+    return redirect(url_for('index'))
+
+@app.route('/delete_post/<int:post_id>', methods=['POST'])
+def delete_post(post_id):
+    if 'user_id' not in session:
+        return redirect(url_for('auth.login'))
+    
+    db.session.execute(update(Post).where(and_(Post.id == post_id, session['user_id'] == Post.UserId)).values({Post.Title: None, Post.Content: None, Post.RepostId: None}))
+    db.session.commit()
+    
     return redirect(url_for('index'))
 
 # Follow/Unfollow User
