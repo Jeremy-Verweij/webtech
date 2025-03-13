@@ -74,17 +74,14 @@
     </form>
 
     <!--Comments Button-->
-    {% if show_extra_buttons %}
     <a class="btn btn-sm btn-outline-info border-2" role="button" href="{{url_for('comments', post_id=post['PostID'])}}"
       ><i class="bi bi-chat-left-dots"></i> {{lang['post_comments']}}</a
     >
-    {% endif %}
 
     <!-- Repost Button -->
     <!-- Uses a small bit of js(onclick) to set the right url for the modal(popup) 
      It basically gets the form from the dom and then it sets the action to the correct url
     -->
-    {% if show_extra_buttons %}
     <button
       type="button"
       {{"disabled" if post.Content == None or
@@ -96,10 +93,9 @@
     >
       <i class="bi bi-repeat"></i> {{lang['post_repost']}}
     </button>
-    {% endif %}
 
     <!--Delete Button, only shows up when the user owns the post and the post isn't yet deleted-->
-    {% if session['user_id'] == post.UserID and show_extra_buttons %}
+    {% if session['user_id'] == post.UserID %}
     <form
       action="{{ url_for('delete_post', post_id=post['PostID']) }}"
       method="POST"

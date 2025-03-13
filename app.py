@@ -4,11 +4,12 @@ import os
 
 from sqlalchemy import func, and_, update
 from sqlalchemy.orm import aliased
-from setup import app, db
+from setup import app, db, turbo
 from models import *
 from blueprints.auth import auth_blueprint
 from utils.hash_password import hash_password
 from utils.lang import get_lang, lang_names, default_lang
+from utils.db_helpers import *
 
 app.secret_key = os.urandom(24) 
 
@@ -29,32 +30,9 @@ def index():
     else:
         session['dark_mode'] = False
         
-    Repost = aliased(Post)
-    RepostUser = aliased(User)
-        
-    posts = db.session.query(\
-            Post.id.label("PostID"), \
-            Post.UserId.label("UserID"), \
-            Post.Title.label("Title"), \
-            Post.Content.label("Content"), \
-            Post.creation_date.label("Date"), \
-            User.UserName.label("UserName"), \
-            func.count(user_post_likes.c.PostId).label("Likes"), \
-            Repost.Title.label('RepostTitle'), \
-            Repost.Content.label('RepostContent'), \
-            Repost.UserId.label('RepostUserId'), \
-            Repost.creation_date.label('RepostDate'), \
-            RepostUser.UserName.label('RepostUserName')) \
-        .outerjoin(user_post_likes, user_post_likes.c.PostId == Post.id) \
-        .outerjoin(Repost, Repost.id == Post.RepostId)\
-        .outerjoin(RepostUser, RepostUser.id == Repost.UserId) \
-        .join(User, User.id == Post.UserId) \
-        .order_by(Post.creation_date.desc()) \
-        .where(Post.ParentPostId == None) \
-        .group_by(Post.id, Repost.id) \
-        .all()
+    posts = get_posts()
 
-    return render_template('index.html', user_name=session['user_name'], posts=posts, show_extra_buttons=True, lang=get_lang(session['language']))
+    return render_template('index.html', user_name=session['user_name'], posts=posts, lang=get_lang(session['language']))
 
 @app.route('/comments/<int:post_id>')
 def comments(post_id):
@@ -64,45 +42,11 @@ def comments(post_id):
     if 'language' not in session:
         session['language'] = default_lang
         
-    Repost = aliased(Post)
-    RepostUser = aliased(User)
-        
-    post = db.session.query(\
-            Post.id.label("PostID"), \
-            Post.UserId.label("UserID"), \
-            Post.Title.label("Title"), \
-            Post.Content.label("Content"), \
-            Post.creation_date.label("Date"), \
-            User.UserName.label("UserName"), \
-            func.count(user_post_likes.c.PostId).label("Likes"), \
-            Repost.Title.label('RepostTitle'), \
-            Repost.Content.label('RepostContent'), \
-            Repost.UserId.label('RepostUserId'), \
-            Repost.creation_date.label('RepostDate'), \
-            RepostUser.UserName.label('RepostUserName')) \
-        .outerjoin(user_post_likes, user_post_likes.c.PostId == Post.id) \
-        .outerjoin(Repost, Repost.id == Post.RepostId)\
-        .outerjoin(RepostUser, RepostUser.id == Repost.UserId) \
-        .join(User, User.id == Post.UserId) \
-        .where(Post.id == post_id) \
-        .group_by(Post.id, Repost.id) \
-        .one_or_none()
+    post = get_post(post_id)
 
-    comments = db.session.query(\
-        Post.id.label("CommentID"), \
-        Post.creation_date.label("Date"), \
-        Post.UserId.label("UserID"), \
-        func.count(user_post_likes.c.PostId).label("Likes"), \
-        User.UserName.label("UserName"), \
-        Post.Content.label("Content")) \
-    .where(Post.ParentPostId == post_id) \
-    .join(User, User.id == Post.UserId) \
-    .outerjoin(user_post_likes, user_post_likes.c.PostId == Post.id) \
-    .group_by(Post.id) \
-    .order_by(Post.creation_date.desc()) \
-    .all()
+    comments = get_comments(post_id)
     
-    return render_template('comments.html', post=post, show_extra_buttons=False, comments=comments, lang=get_lang(session['language']))
+    return render_template('comments.html', post=post, comments=comments, lang=get_lang(session['language']))
 
 @app.route('/profile/<int:user_id>')
 def profile(user_id):
@@ -140,8 +84,17 @@ def create_post():
     new_post = Post(session["user_id"], title, content)
     db.session.add(new_post)
     db.session.commit()
-
-    return redirect(url_for('index'))
+    
+    turbo.push(turbo.prepend(\
+        render_template("includes/post.html", user_name=session['user_name'], post=get_post(new_post.id), lang=get_lang(session['language'])),\
+        "posts"))
+    
+    if turbo.can_stream():
+        return turbo.stream(
+            turbo.replace(render_template("includes/new_post.html", lang=get_lang(session['language'])), "new_post"),
+        )
+    else:
+        return redirect(url_for('index'))
 
 # Like Post
 @app.route('/like_post/<int:post_id>', methods=['POST'])
@@ -163,7 +116,19 @@ def like_post(post_id):
         db.session.add(post)
     db.session.commit()
 
-    return redirect(url_for('index'))
+    if(post.ParentPostId == None):
+        turbo.push(turbo.replace(\
+            render_template("includes/post.html", user_name=session['user_name'], post=get_post(post_id), lang=get_lang(session['language'])),\
+            f"post-{post_id}"))
+    else:
+        turbo.push(turbo.replace(\
+            render_template("includes/comment.html", user_name=session['user_name'], comment=get_comment(post_id), lang=get_lang(session['language'])),\
+            f"comment-{post_id}"))
+
+    if turbo.can_stream():
+        return turbo.stream(turbo.remove("unused_id"))
+    else:
+        return redirect(url_for('index'))
 
 @app.route('/create_comment/<int:post_id>', methods=['POST'])
 def create_comment(post_id):
@@ -186,7 +151,14 @@ def delete_post(post_id):
     db.session.execute(update(Post).where(and_(Post.id == post_id, session['user_id'] == Post.UserId)).values({Post.Title: None, Post.Content: None, Post.RepostId: None}))
     db.session.commit()
     
-    return redirect(url_for('index'))
+    turbo.push(turbo.replace(\
+        render_template("includes/post.html", user_name=session['user_name'], post=get_post(post_id), lang=get_lang(session['language'])),\
+        f"post-{post_id}"))
+
+    if turbo.can_stream():
+        return turbo.stream(turbo.remove("unused_id"))
+    else:
+        return redirect(url_for('index'))
 
 # Follow/Unfollow User
 @app.route('/follow/<int:user_id>', methods=['POST'])
@@ -225,7 +197,16 @@ def repost(post_id):
     db.session.add(repost)
     db.session.commit()
 
-    return redirect(url_for('index'))
+    turbo.push(turbo.prepend(\
+        render_template("includes/post.html", user_name=session['user_name'], post=get_post(repost.id), lang=get_lang(session['language'])),\
+        "posts"))
+
+    if turbo.can_stream():
+        return turbo.stream(turbo.replace( \
+            render_template("includes/repost.html", lang=get_lang(session['language'])), \
+            "repostModal"))
+    else:
+        return redirect(url_for('index'))
 
 
 @app.route('/profile_picture/<int:user_id>')
@@ -275,7 +256,7 @@ def edit_profile():
         db.session.commit()
         
         session['user_name'] = username
-        return redirect(url_for('index'))
+        return redirect(url_for('edit_profile'))
 
     if 'language' not in session:
         session['language'] = default_lang
