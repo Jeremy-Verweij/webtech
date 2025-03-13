@@ -92,10 +92,12 @@ def comments(post_id):
         Post.id.label("CommentID"), \
         Post.creation_date.label("Date"), \
         Post.UserId.label("UserID"), \
+        func.count(user_post_likes.c.PostId).label("Likes"), \
         User.UserName.label("UserName"), \
         Post.Content.label("Content")) \
     .where(Post.ParentPostId == post_id) \
     .join(User, User.id == Post.UserId) \
+    .outerjoin(user_post_likes, user_post_likes.c.PostId == Post.id) \
     .all()
     
     return render_template('comments.html', post=post, show_extra_buttons=False, comments=comments, lang=get_lang(session['language']))
