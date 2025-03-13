@@ -35,7 +35,8 @@
           />&nbsp;
           <h5 class="ml-2 d-inline">{{ post['RepostUserName'] }}</h5>
         </a>
-        {% with date = post['RepostDate'].strftime("%x")%}
+        {% with date = post['RepostDate'].strftime("%x") + " " + post['RepostDate'].strftime("%H")
+      + ":" + post['RepostDate'].strftime("%M")%}
         <span class="nl-2 text-end flex-fill">{{date}}</span>
         {% endwith %}
       </div>
