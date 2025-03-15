@@ -63,7 +63,7 @@
 
     <!-- Like Button -->
     <form
-      action="{{ url_for('like_post', post_id=post['PostID']) }}"
+      action="{{ url_for('post.like_post', post_id=post['PostID']) }}"
       method="POST"
       class="d-inline"
     >
@@ -89,7 +89,7 @@
       class="btn btn-sm btn-outline-success border-2"
       data-bs-toggle="modal"
       data-bs-target="#repostModal"
-      onclick="document.getElementById('repostForm').action='{{ url_for('repost', post_id=post['PostID']) }}'"
+      onclick="document.getElementById('repostForm').action='{{ url_for('post.repost', post_id=post['PostID']) }}'"
     >
       <i class="bi bi-repeat"></i> {{lang['post_repost']}}
     </button>
@@ -97,7 +97,7 @@
     <!--Delete Button, only shows up when the user owns the post and the post isn't yet deleted-->
     {% if session['user_id'] == post.UserID %}
     <form
-      action="{{ url_for('delete_post', post_id=post['PostID']) }}"
+      action="{{ url_for('post.delete_post', post_id=post['PostID']) }}"
       method="POST"
       class="d-inline"
     >
