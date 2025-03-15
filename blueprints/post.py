@@ -1,7 +1,6 @@
 from flask import Blueprint, render_template, redirect, request, session, url_for
 from sqlalchemy import and_, update
-import turbo
-from setup import db
+from setup import db, turbo
 from models import *
 from utils.db_helpers import get_comment, get_post
 from utils.lang import get_lang
