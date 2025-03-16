@@ -1,54 +1,55 @@
 {% if post.Title != "" and post.Content != "" %}
-<div id="post-{{post['PostID']}}" class="card mb-3">
+{% with uuid=""|gen_uuid %}
+<div id="post-{{post['id']}}" class="card mb-3">
   <div class="card-body">
     <div class="d-flex">
       <a
         class="text-reset text-decoration-none"
-        href="/profile/{{post.UserID}}"
+        href="/profile/{{post.UserId}}"
       >
         <img
-          src="{{ url_for('profile_picture', user_id=post.UserID) }}"
+          src="{{ url_for('profile_picture', user_id=post.UserId) }}"
           class="rounded-circle d-inline"
           width="40"
           height="40"
         />&nbsp;
-        <h5 class="ml-2 d-inline">{{ post['UserName'] }}</h5>
+        <h5 class="ml-2 d-inline">{{ post['User']['UserName'] }}</h5>
       </a>
-      {% with date = post['Date'].strftime("%x") + " " + post['Date'].strftime("%H")
-      + ":" + post['Date'].strftime("%M")%}
+      {% with date = post['creation_date'].strftime("%x") + " " + post['creation_date'].strftime("%H")
+      + ":" + post['creation_date'].strftime("%M")%}
       <span class="ml-2 text-end flex-fill">{{ date }} </span>
       {% endwith %}
     </div>
 
-    {% if post['RepostTitle'] %}
+    {% if post['Repost']['Title'] %}
     <div class="card-body border border-3 m-3">
       <div class="d-flex">
         <a
           class="text-reset text-decoration-none"
-          href="/profile/{{post.RepostUserId}}"
+          href="/profile/{{post.Repost.UserId}}"
         >
           <img
-            src="{{ url_for('profile_picture', user_id=post.RepostUserId) }}"
+            src="{{ url_for('profile_picture', user_id=post.Repost.UserId) }}"
             class="rounded-circle d-inline"
             width="40"
             height="40"
           />&nbsp;
-          <h5 class="ml-2 d-inline">{{ post['RepostUserName'] }}</h5>
+          <h5 class="ml-2 d-inline">{{ post['Repost']['UserName'] }}</h5>
         </a>
-        {% with date = post['RepostDate'].strftime("%x") + " " + post['RepostDate'].strftime("%H")
-      + ":" + post['RepostDate'].strftime("%M")%}
+        {% with date = post['Repost']['creation_date'].strftime("%x") + " " + post['Repost']['creation_date'].strftime("%H")
+      + ":" + post['Repost']['creation_date'].strftime("%M")%}
         <span class="nl-2 text-end flex-fill">{{date}}</span>
         {% endwith %}
       </div>
 
-      {% if post['RepostTitle'] == None %}
+      {% if post['Repost']['Title'] == None %}
       <h6 class="mt-2">{{lang['post_deleted']}}</h6>
       {% else %}
-      <h6 class="mt-2">{{ post['RepostTitle'] }}</h6>
-      {% endif %} {% if post['RepostContent'] == None %}
+      <h6 class="mt-2">{{ post['Repost']['Title'] }}</h6>
+      {% endif %} {% if post['Repost']['Content'] == None %}
       <p>{{lang['post_deleted']}}</p>
       {% else %}
-      <p>{{ post['RepostContent'] }}</p>
+      <p>{{ post['Repost']['Content'] }}</p>
       {% endif %}
     </div>
     {% endif %} {% if post['Title'] == None %}
@@ -63,20 +64,23 @@
 
     <!-- Like Button -->
     <form
-      action="{{ url_for('post.like_post', post_id=post['PostID']) }}"
+      action="{{ url_for('post.like_post', post_id=post['id']) }}"
       method="POST"
       class="d-inline"
     >
       <button {{"disabled" if post.Content == None or
     post.Title == None else ""}} type="submit" class="btn btn-sm btn-outline-primary border-2">
-        <i class="bi bi-heart"></i> {{lang['post_like']}} ({{ post['Likes'] }})
+        <i class="bi bi-heart"></i> {{lang['post_like']}} ({{ post['likes']|length }})
       </button>
     </form>
 
     <!--Comments Button-->
-    <a class="btn btn-sm btn-outline-info border-2" role="button" href="{{url_for('comments', post_id=post['PostID'])}}"
+    <!-- <a class="btn btn-sm btn-outline-info border-2" role="button" href="{{url_for('comments', post_id=post['id'])}}"
       ><i class="bi bi-chat-left-dots"></i> {{lang['post_comments']}}</a
-    >
+    > -->
+    <button class="btn btn-sm btn-outline-info" type="button" data-bs-toggle="collapse" data-bs-target="#collapse1{{ uuid }}">
+      <i class="bi bi-chat-left-dots"></i> {{lang['post_comments']}} ({{post.comments|length}})
+    </button>
 
     <!-- Repost Button -->
     <!-- Uses a small bit of js(onclick) to set the right url for the modal(popup) 
@@ -89,15 +93,15 @@
       class="btn btn-sm btn-outline-success border-2"
       data-bs-toggle="modal"
       data-bs-target="#repostModal"
-      onclick="document.getElementById('repostForm').action='{{ url_for('post.repost', post_id=post['PostID']) }}'"
+      onclick="document.getElementById('repostForm').action='{{ url_for('post.repost', post_id=post['id']) }}'"
     >
       <i class="bi bi-repeat"></i> {{lang['post_repost']}}
     </button>
 
     <!--Delete Button, only shows up when the user owns the post and the post isn't yet deleted-->
-    {% if session['user_id'] == post.UserID %}
+    {% if session['user_id'] == post.UserId %}
     <form
-      action="{{ url_for('post.delete_post', post_id=post['PostID']) }}"
+      action="{{ url_for('post.delete_post', post_id=post['id']) }}"
       method="POST"
       class="d-inline"
     >
@@ -111,6 +115,17 @@
       </button>
     </form>
     {% endif %}
+    <!-- comment section collapsable -->
+    <div>
+      <div class="collapse" id="collapse1{{ uuid }}">
+        {% for comment in post.comments %} 
+          {% with post=comment %}   
+            {% include 'includes/post.html' %} 
+          {% endwith %} 
+        {% endfor %}
+      </div>
+    </div>
   </div>
 </div>
+{% endwith %}
 {% endif %}
