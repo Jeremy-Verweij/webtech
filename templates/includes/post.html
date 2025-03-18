@@ -69,8 +69,10 @@
       class="d-inline"
     >
       <button type="submit" class="btn btn-sm btn-outline-primary border-2">
-        <i class="bi bi-heart"></i> {{lang['post_like']}} ({{
-        post['likes']|length }})
+        <i class="bi bi-heart"></i> {{lang['post_like']}} (<span
+          id="likes-{{post['id']}}"
+          >{{ post['likes']|length }}</span
+        >)
       </button>
     </form>
 

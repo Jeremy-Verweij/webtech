@@ -94,30 +94,12 @@ def like_post(post_id):
         db.session.add(post)
     db.session.commit()
 
-    if post.ParentPostId == None:
-        turbo.push(
-            turbo.replace(
-                render_template(
-                    "includes/post.html",
-                    user_name=session["user_name"],
-                    post=get_post(post_id),
-                    lang=get_lang(session["language"]),
-                ),
-                f"post-{post_id}",
-            )
+    turbo.push(
+        turbo.update(
+            post.likes.__len__(),
+            f"likes-{post_id}",
         )
-    else:
-        turbo.push(
-            turbo.replace(
-                render_template(
-                    "includes/comment.html",
-                    user_name=session["user_name"],
-                    post=get_comment(post_id),
-                    lang=get_lang(session["language"]),
-                ),
-                f"comment-{post_id}",
-            )
-        )
+    )
 
     if turbo.can_stream():
         return turbo.stream(turbo.remove("unused_id"))
@@ -125,6 +107,7 @@ def like_post(post_id):
         return redirect(url_for("index"))
 
 
+# TODO: FIX DELETE BTN
 @post_blueprint.route("/create_comment/<int:post_id>", methods=["POST"])
 def create_comment(post_id):
     if "user_id" not in session:
@@ -159,8 +142,6 @@ def create_comment(post_id):
             ),
             f"comment-{post_id}",
         )
-
-    print(replaceParentStatement)
 
     turbo.push([
         turbo.append(
