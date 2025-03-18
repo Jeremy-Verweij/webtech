@@ -1,0 +1,29 @@
+{% if post.Title != "" and post.Content != "" %} {% with uuid=""|gen_uuid %}
+<div class="card mb-3 p-2">
+  {% include "includes/post.html" %}
+  <!-- comment section collapsable -->
+  <div>
+    <div class="collapse" id="collapse1{{ uuid }}">
+      {% for comment in post.comments %} {% with post=comment %} {% include
+      'includes/comment_outer.html' %} {% endwith %} {% endfor %}
+      <form
+        action="{{url_for('post.create_comment', post_id=post.id)}}"
+        method="post"
+      >
+        <div class="input-group mt-2">
+          <input
+            type="text"
+            class="form-control d-inline"
+            name="content"
+            placeholder="{{lang['new_comment_content']}}"
+            required
+          />
+          <button type="submit" class="btn btn-primary d-inline px-4">
+            {{lang['new_post_post']}}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endwith %} {% endif %}

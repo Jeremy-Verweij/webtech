@@ -91,7 +91,7 @@ def like_post(post_id):
                 render_template(
                     "includes/comment.html",
                     user_name=session["user_name"],
-                    comment=get_comment(post_id),
+                    post=get_comment(post_id),
                     lang=get_lang(session["language"]),
                 ),
                 f"comment-{post_id}",
