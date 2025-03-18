@@ -19,3 +19,9 @@ for creating a migration script:
 ```bash
     flask db downgrade
 ```
+
+for running it on the internet
+
+```bash
+    ssh -p 443 -R0:127.0.0.1:5000 qr@a.pinggy.io
+```
