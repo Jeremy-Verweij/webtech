@@ -112,8 +112,6 @@ def create_comment(post_id):
     db.session.commit()
     post = get_post(new_post.id)
 
-    print(get_post(post_id).comments.__len__())
-    
     turbo.push(turbo.update(
         get_post(post_id).comments.__len__(),
         f"comments-{post_id}",
