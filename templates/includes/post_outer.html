@@ -5,8 +5,8 @@
   <div>
     <div class="collapse" id="collapse1{{ uuid }}">
       <div class="post-comments-{{post.id}}">
-        {% for comment in post.comments %} {% with post=comment %} {% include
-        'includes/comment_outer.html' %} {% endwith %} {% endfor %}
+        {% for comment in post.comments | reverse%} {% with post=comment %} {%
+        include 'includes/comment_outer.html' %} {% endwith %} {% endfor %}
       </div>
       {% include "includes/new_comment.html" %}
     </div>

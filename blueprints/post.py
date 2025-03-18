@@ -28,7 +28,7 @@ def create_post():
         turbo_id = session_id_to_turbo_id[session["user_id"]]
 
     push_except(turbo,
-            turbo.append(
+            turbo.prepend(
                 render_template(
                     "includes/post_outer.html",
                     user_name=None,
@@ -42,7 +42,7 @@ def create_post():
     
     if turbo.can_stream():
         return turbo.stream([
-            turbo.append(
+            turbo.prepend(
                 render_template(
                     "includes/post_outer.html",
                     user_name=session["user_name"],
@@ -122,7 +122,7 @@ def create_comment(post_id):
         turbo_id = session_id_to_turbo_id[session["user_id"]]
 
     push_except(turbo,
-        turbo.append(
+        turbo.prepend(
             render_template("includes/comment_outer.html",
             post=post,
             user_name=None,
@@ -140,7 +140,7 @@ def create_comment(post_id):
                 lang=get_lang(session["language"])),
                 f"post-comment-form-{post_id}"
             ),
-                    turbo.append(
+                    turbo.prepend(
             render_template("includes/comment_outer.html",
                 post=post,
                 user_name=session["user_name"],
@@ -207,7 +207,7 @@ def repost(post_id):
     db.session.commit()
 
     turbo.push(
-        turbo.append(
+        turbo.prepend(
             render_template(
                 "includes/post_outer.html",
                 user_name=session["user_name"],

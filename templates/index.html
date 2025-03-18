@@ -11,8 +11,8 @@
 
   <!-- Posts Feed -->
   <div id="posts" class="pb-5">
-    {% for post in posts %} {% include 'includes/post_outer.html' %} {% endfor
-    %}
+    {% for post in posts | reverse%} {% include 'includes/post_outer.html' %} {%
+    endfor %}
   </div>
   {% include "includes/repost.html" %}
 </div>
