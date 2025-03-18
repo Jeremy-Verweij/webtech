@@ -1,4 +1,5 @@
-{% extends 'layout.html' %} {% block content %}
+{% extends 'layout.html' %} {% block extra_header %} {{ turbo() }}{% endblock %}
+{% block content %}
 <div class="container mt-4">
   <h1>{{lang['welcome_title']}} {{ user_name }}!</h1>
   <p>{{lang['welcome_sub_title']}}</p>

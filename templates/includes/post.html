@@ -101,7 +101,7 @@
     </button>
 
     <!--Delete Button, only shows up when the user owns the post and the post isn't yet deleted-->
-    {% if session['user_id'] == post.UserId %}
+    {% if post['User']['UserName'] == user_name %}
     <form
       action="{{ url_for('post.delete_post', post_id=post['id']) }}"
       method="POST"

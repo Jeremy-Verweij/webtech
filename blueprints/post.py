@@ -1,9 +1,12 @@
 from flask import Blueprint, render_template, redirect, request, session, url_for
+from h11 import ConnectionClosed
 from sqlalchemy import and_, update
 from setup import db, turbo
 from models import *
 from utils.db_helpers import get_comment, get_post
 from utils.lang import get_lang
+from turbo_flask import Turbo
+from utils.turbo_helper import push_except, session_id_to_turbo_id
 
 post_blueprint = Blueprint("post", __name__, template_folder="templates")
 
@@ -21,27 +24,45 @@ def create_post():
     db.session.add(new_post)
     db.session.commit()
 
-    turbo.push(
-        turbo.append(
-            render_template(
-                "includes/post_outer.html",
-                user_name=session["user_name"],
-                post=get_post(new_post.id),
-                lang=get_lang(session["language"]),
+    turbo_id = None
+    if session["user_id"] in session_id_to_turbo_id:
+        turbo_id = session_id_to_turbo_id[session["user_id"]]
+
+    print(turbo_id)
+
+    push_except(turbo,
+            turbo.append(
+                render_template(
+                    "includes/post_outer.html",
+                    user_name=None,
+                    post=get_post(new_post.id),
+                    lang=get_lang(session["language"]),
+                ),
+                "posts"
             ),
-            "posts",
+            turbo_id
         )
-    )
+    
+    print(turbo.clients)
 
     if turbo.can_stream():
-        return turbo.stream(
+        return turbo.stream([
+            turbo.append(
+                render_template(
+                    "includes/post_outer.html",
+                    user_name=session["user_name"],
+                    post=get_post(new_post.id),
+                    lang=get_lang(session["language"]),
+                ),
+                "posts",
+            ),
             turbo.replace(
                 render_template(
                     "includes/new_post.html", lang=get_lang(session["language"])
                 ),
                 "new_post",
             ),
-        )
+        ])
     else:
         return redirect(url_for("index"))
 

@@ -23,3 +23,5 @@ metadata = MetaData(naming_convention=convention)
 
 db = SQLAlchemy(app, metadata=metadata)
 migrate = Migrate(app, db)
+
+
