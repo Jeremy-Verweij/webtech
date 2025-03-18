@@ -174,17 +174,32 @@ def delete_post(post_id):
     )
     db.session.commit()
 
-    turbo.push(
-        turbo.replace(
-            render_template(
-                "includes/post.html",
-                user_name=session["user_name"],
-                post=get_post(post_id),
-                lang=get_lang(session["language"]),
-            ),
-            f"post-{post_id}"
+    post = db.session.query(Post).where(Post.id == post_id).one_or_none()
+    
+    if post.ParentPostId == None:
+        turbo.push(
+            turbo.replace(
+                render_template(
+                    "includes/post.html",
+                    user_name=session["user_name"],
+                    post=get_post(post_id),
+                    lang=get_lang(session["language"]),
+                ),
+                f"post-{post_id}",
+            )
         )
-    )
+    else:
+        turbo.push(
+            turbo.replace(
+                render_template(
+                    "includes/comment.html",
+                    user_name=session["user_name"],
+                    post=get_comment(post_id),
+                    lang=get_lang(session["language"]),
+                ),
+                f"comment-{post_id}",
+            )
+        )
 
     if turbo.can_stream():
         return turbo.stream(turbo.remove("unused_id"))
