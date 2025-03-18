@@ -27,8 +27,6 @@ def not_found(e):
 
 @app.route("/")
 def index():
-    print(session)    
-    
     if "user_id" not in session:
         return redirect(url_for("auth.login"))
 
