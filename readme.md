@@ -20,7 +20,15 @@ for creating a migration script:
     flask db downgrade
 ```
 
-for running it on the internet
+## Setting up server for public acces
+
+for starting server
+
+```bash
+    flask run
+```
+
+for making server public
 
 ```bash
     ssh -p 443 -R0:127.0.0.1:5000 qr@a.pinggy.io
