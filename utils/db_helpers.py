@@ -55,7 +55,7 @@ def get_comments(post_id):
 
 def get_posts():
 
-    stmt = select(Post).options(selectinload(Post.comments, recursion_depth=None))
+    stmt = select(Post).options(selectinload(Post.comments, recursion_depth=None)).where(Post.ParentPostId == None)
     res = db.session.execute(stmt).scalars().all()
 
     return res

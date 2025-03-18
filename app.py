@@ -18,6 +18,9 @@ app.add_template_filter(gen_uuid)
 app.register_blueprint(auth_blueprint)
 app.register_blueprint(post_blueprint)
 
+@app.errorhandler(404)
+def not_found(e):
+    return render_template("404.html")
 
 @app.route("/")
 def index():

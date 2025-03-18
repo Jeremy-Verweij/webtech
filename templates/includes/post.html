@@ -1,6 +1,7 @@
 {% if post.Title != "" and post.Content != "" %}
 {% with uuid=""|gen_uuid %}
 <div id="post-{{post['id']}}" class="card mb-3">
+  {{post}}
   <div class="card-body">
     <div class="d-flex">
       <a
