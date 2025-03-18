@@ -2,14 +2,15 @@ import io
 from flask import make_response, render_template, request, redirect, url_for, session
 import os
 
-from sqlalchemy import func, and_, update
-from setup import app, db, turbo
+from sqlalchemy import and_
+from setup import app, db
 from models import *
 from blueprints import auth_blueprint, post_blueprint
 from utils.hash_password import hash_password
 from utils.lang import get_lang, lang_names, default_lang
 from utils.db_helpers import *
 from utils.jinja_uuid_gen import gen_uuid
+from utils.turbo_helper import turbo_user_id_init
 
 app.secret_key = os.urandom(24)
 
@@ -18,18 +19,22 @@ app.add_template_filter(gen_uuid)
 app.register_blueprint(auth_blueprint)
 app.register_blueprint(post_blueprint)
 
+turbo_user_id_init()
+
 @app.errorhandler(404)
 def not_found(e):
     return render_template("404.html")
 
 @app.route("/")
 def index():
+    print(session)    
+    
     if "user_id" not in session:
         return redirect(url_for("auth.login"))
 
     if "language" not in session:
         session["language"] = default_lang
-
+        
     user_settings = (
         db.session.query(Settings)
         .where(Settings.UserId == session["user_id"])

@@ -1,9 +1,11 @@
 from flask import Blueprint, render_template, redirect, request, session, url_for
+from h11 import ConnectionClosed
 from sqlalchemy import and_, update
 from setup import db, turbo
 from models import *
 from utils.db_helpers import get_comment, get_post
 from utils.lang import get_lang
+from utils.turbo_helper import push_except, session_id_to_turbo_id
 
 post_blueprint = Blueprint("post", __name__, template_folder="templates")
 
@@ -21,30 +23,43 @@ def create_post():
     db.session.add(new_post)
     db.session.commit()
 
-    turbo.push(
-        turbo.append(
-            render_template(
-                "includes/post_outer.html",
-                user_name=session["user_name"],
-                post=get_post(new_post.id),
-                lang=get_lang(session["language"]),
-            ),
-            "posts",
-        )
-    )
+    turbo_id = None
+    if session["user_id"] in session_id_to_turbo_id:
+        turbo_id = session_id_to_turbo_id[session["user_id"]]
 
+    push_except(turbo,
+            turbo.append(
+                render_template(
+                    "includes/post_outer.html",
+                    user_name=None,
+                    post=get_post(new_post.id),
+                    lang=get_lang(session["language"]),
+                ),
+                "posts"
+            ),
+            turbo_id
+        )
+    
     if turbo.can_stream():
-        return turbo.stream(
+        return turbo.stream([
+            turbo.append(
+                render_template(
+                    "includes/post_outer.html",
+                    user_name=session["user_name"],
+                    post=get_post(new_post.id),
+                    lang=get_lang(session["language"]),
+                ),
+                "posts",
+            ),
             turbo.replace(
                 render_template(
                     "includes/new_post.html", lang=get_lang(session["language"])
                 ),
                 "new_post",
             ),
-        )
+        ])
     else:
         return redirect(url_for("index"))
-
 
 # Like Post
 @post_blueprint.route("/like_post/<int:post_id>", methods=["POST"])
@@ -73,36 +88,17 @@ def like_post(post_id):
         db.session.add(post)
     db.session.commit()
 
-    if post.ParentPostId == None:
-        turbo.push(
-            turbo.replace(
-                render_template(
-                    "includes/post.html",
-                    user_name=session["user_name"],
-                    post=get_post(post_id),
-                    lang=get_lang(session["language"]),
-                ),
-                f"post-{post_id}",
-            )
+    turbo.push(
+        turbo.update(
+            post.likes.__len__(),
+            f"likes-{post_id}",
         )
-    else:
-        turbo.push(
-            turbo.replace(
-                render_template(
-                    "includes/comment.html",
-                    user_name=session["user_name"],
-                    post=get_comment(post_id),
-                    lang=get_lang(session["language"]),
-                ),
-                f"comment-{post_id}",
-            )
-        )
+    )
 
     if turbo.can_stream():
         return turbo.stream(turbo.remove("unused_id"))
     else:
         return redirect(url_for("index"))
-
 
 @post_blueprint.route("/create_comment/<int:post_id>", methods=["POST"])
 def create_comment(post_id):
@@ -115,52 +111,45 @@ def create_comment(post_id):
     db.session.add(new_post)
     db.session.commit()
     post = get_post(new_post.id)
-    parent_post = get_post(post_id)
+
+    turbo.push(turbo.update(
+        get_post(post_id).comments.__len__(),
+        f"comments-{post_id}",
+    ))
     
-    replaceParentStatement:any = None
-    if parent_post.ParentPostId == None:
-        replaceParentStatement = turbo.replace(
-            render_template(
-                "includes/post.html",
-                user_name=session["user_name"],
-                post=parent_post,
-                lang=get_lang(session["language"]),
-            ),
-            f"post-{post_id}",
-        )
-    else:
-        replaceParentStatement = turbo.replace(
-            render_template(
-                "includes/comment.html",
-                user_name=session["user_name"],
-                post=parent_post,
-                lang=get_lang(session["language"]),
-            ),
-            f"comment-{post_id}",
-        )
+    turbo_id = None
+    if session["user_id"] in session_id_to_turbo_id:
+        turbo_id = session_id_to_turbo_id[session["user_id"]]
 
-    print(replaceParentStatement)
-
-    turbo.push([
+    push_except(turbo,
         turbo.append(
             render_template("includes/comment_outer.html",
             post=post,
+            user_name=None,
             lang=get_lang(session["language"])),
             f".post-comments-{post_id}",
         multiple=True),
-        replaceParentStatement
-        ])
+        turbo_id
+    )
     
     if turbo.can_stream():
-        return turbo.stream(turbo.replace(
+        return turbo.stream([
+            turbo.replace(
                 render_template("includes/new_comment.html",
                 post={"id": post_id},
                 lang=get_lang(session["language"])),
                 f"post-comment-form-{post_id}"
-                ))
+            ),
+                    turbo.append(
+            render_template("includes/comment_outer.html",
+                post=post,
+                user_name=session["user_name"],
+                lang=get_lang(session["language"])),
+                f".post-comments-{post_id}",
+            multiple=True),
+        ])
     else:
         return redirect(url_for("index"))
-
 
 @post_blueprint.route("/delete_post/<int:post_id>", methods=["POST"])
 def delete_post(post_id):
@@ -176,9 +165,10 @@ def delete_post(post_id):
 
     post = db.session.query(Post).where(Post.id == post_id).one_or_none()
     
+    delete_post_client = None
+    
     if post.ParentPostId == None:
-        turbo.push(
-            turbo.replace(
+        delete_post_client = turbo.replace(
                 render_template(
                     "includes/post.html",
                     user_name=session["user_name"],
@@ -187,10 +177,8 @@ def delete_post(post_id):
                 ),
                 f"post-{post_id}",
             )
-        )
     else:
-        turbo.push(
-            turbo.replace(
+        delete_post_client = turbo.replace(
                 render_template(
                     "includes/comment.html",
                     user_name=session["user_name"],
@@ -199,13 +187,11 @@ def delete_post(post_id):
                 ),
                 f"comment-{post_id}",
             )
-        )
 
     if turbo.can_stream():
-        return turbo.stream(turbo.remove("unused_id"))
+        return turbo.stream(delete_post_client)
     else:
         return redirect(url_for("index"))
-
 
 # Repost
 @post_blueprint.route("/repost/<int:post_id>", methods=["POST"])
