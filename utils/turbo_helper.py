@@ -10,8 +10,6 @@ def turbo_user_id_init():
     def get_user_id():
         id = turbo.default_user_id()
         
-        print("SEE ME!!!!!!!!!!!", session)
-        
         if "user_id" in session:
             session_id_to_turbo_id[session["user_id"]] = id
             
