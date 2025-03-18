@@ -16,14 +16,7 @@ def get_post(post_id):
 
 
 def get_comment(comment_id):
-    stmt = (
-        select(Post)
-        .options(selectinload(Post.comments, recursion_depth=None))
-        .where(Post.id == comment_id)
-    )
-    res = db.session.execute(stmt).scalars().one_or_none()
-
-    return res
+    return get_post(comment_id)
 
 
 def get_comments(post_id):

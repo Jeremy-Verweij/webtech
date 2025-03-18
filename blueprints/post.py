@@ -115,14 +115,41 @@ def create_comment(post_id):
     db.session.add(new_post)
     db.session.commit()
     post = get_post(new_post.id)
+    parent_post = get_post(post_id)
+    
+    replaceParentStatement:any = None
+    if parent_post.ParentPostId == None:
+        replaceParentStatement = turbo.replace(
+            render_template(
+                "includes/post.html",
+                user_name=session["user_name"],
+                post=parent_post,
+                lang=get_lang(session["language"]),
+            ),
+            f"post-{post_id}",
+        )
+    else:
+        replaceParentStatement = turbo.replace(
+            render_template(
+                "includes/comment.html",
+                user_name=session["user_name"],
+                post=parent_post,
+                lang=get_lang(session["language"]),
+            ),
+            f"comment-{post_id}",
+        )
 
-    turbo.push(turbo.append(
-        render_template("includes/comment_outer.html",
-        post=post,
-        lang=get_lang(session["language"])),
-        f".post-comments-{post_id}",
-        multiple=True
-        ))
+    print(replaceParentStatement)
+
+    turbo.push([
+        turbo.append(
+            render_template("includes/comment_outer.html",
+            post=post,
+            lang=get_lang(session["language"])),
+            f".post-comments-{post_id}",
+        multiple=True),
+        replaceParentStatement
+        ])
     
     if turbo.can_stream():
         return turbo.stream(turbo.replace(
