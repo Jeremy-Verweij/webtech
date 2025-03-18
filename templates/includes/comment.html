@@ -18,10 +18,8 @@
 
   {% if post['Content'] == None %}
   <p>{{lang['post_deleted']}}</p>
-  {% else %}
-  <p id="content-{{post['id']}}">{{ post['Content'] }}</p>
-  {% endif %} {% with button_disabled = "disabled" if post.Content == None else
-  "" %}
+  {% else %} {% include "includes/post_content.html" %} {% endif %} {% with
+  button_disabled = "disabled" if post.Content == None else "" %}
 
   <form
     action="{{ url_for('post.like_post', post_id=post['id']) }}"

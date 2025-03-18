@@ -1,0 +1,8 @@
+{% autoescape false %} {% with content=post['Content'].replace("<",
+"&lt;").replace(">", "&gt;").replace("\n", "<br />") %} {% with
+content_with_at=replace_regex('(@)(\\w+)', "<a
+  href=" + url_for('user_name', user_name=(search_regex('(?<=@)(\\w+)', content) or "")) + "
+  >@" + (search_regex('(?<=@)(\\w+)', content) or "") + "</a
+>", content) %}
+<p id="content-{{post['id']}}">{{ content_with_at or content }}</p>
+{% endwith %} {% endwith %} {% endautoescape %}

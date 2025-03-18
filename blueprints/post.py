@@ -1,5 +1,4 @@
 from flask import Blueprint, render_template, redirect, request, session, url_for
-from h11 import ConnectionClosed
 from sqlalchemy import and_, update
 from setup import db, turbo
 from models import *

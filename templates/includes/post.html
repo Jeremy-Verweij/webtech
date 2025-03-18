@@ -58,10 +58,9 @@
     <h6 id="title-{{post['id']}}" class="mt-2">{{ post['Title'] }}</h6>
     {% endif %} {% if post['Content'] == None %}
     <p>{{lang['post_deleted']}}</p>
-    {% else %}
-    <p id="content-{{post['id']}}">{{ post['Content'] }}</p>
-    {% endif %} {% with button_disabled = "disabled" if post.Content == None or
-    post.Title == None else "" %}
+    {% else %} {% include "includes/post_content.html" %} {% endif %} {% with
+    button_disabled = "disabled" if post.Content == None or post.Title == None
+    else "" %}
     <!-- Like Button -->
     <form
       action="{{ url_for('post.like_post', post_id=post['id']) }}"

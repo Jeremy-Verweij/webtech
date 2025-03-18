@@ -1,6 +1,7 @@
 import io
 from flask import make_response, render_template, request, redirect, url_for, session
 import os
+import re
 
 from sqlalchemy import and_
 from setup import app, db
@@ -20,6 +21,28 @@ app.register_blueprint(auth_blueprint)
 app.register_blueprint(post_blueprint)
 
 turbo_user_id_init()
+
+
+@app.context_processor
+def custom_template_function():
+    def search_regex(regex:str, string:str):
+        m = re.search(regex, string)
+        
+        if m == None:
+            return None
+        
+        return m.group(0)
+    
+    def replace_regex(regex, replacement, string):
+        return re.sub(regex, replacement, string)
+        r = search_regex(regex, string)
+        
+        if r == None:
+            return ""
+        
+        return string.replace(r, replacement)
+    
+    return dict(search_regex = search_regex, replace_regex = replace_regex)
 
 @app.errorhandler(404)
 def not_found(e):
@@ -53,6 +76,14 @@ def index():
         lang=get_lang(session["language"]),
     )
 
+@app.route("/user_name/<user_name>")
+def user_name(user_name):
+    user = db.session.query(User).where(User.UserName == str(user_name)).one_or_none()
+    
+    if user == None:
+        return redirect(url_for("index"))
+    
+    return redirect(url_for("profile", user_id = user.id))
 
 @app.route("/comments/<int:post_id>")
 def comments(post_id):
