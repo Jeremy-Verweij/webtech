@@ -5,7 +5,6 @@ from setup import db, turbo
 from models import *
 from utils.db_helpers import get_comment, get_post
 from utils.lang import get_lang
-from turbo_flask import Turbo
 from utils.turbo_helper import push_except, session_id_to_turbo_id
 
 post_blueprint = Blueprint("post", __name__, template_folder="templates")
@@ -28,8 +27,6 @@ def create_post():
     if session["user_id"] in session_id_to_turbo_id:
         turbo_id = session_id_to_turbo_id[session["user_id"]]
 
-    print(turbo_id)
-
     push_except(turbo,
             turbo.append(
                 render_template(
@@ -43,8 +40,6 @@ def create_post():
             turbo_id
         )
     
-    print(turbo.clients)
-
     if turbo.can_stream():
         return turbo.stream([
             turbo.append(
@@ -119,47 +114,45 @@ def create_comment(post_id):
     db.session.add(new_post)
     db.session.commit()
     post = get_post(new_post.id)
-    parent_post = get_post(post_id)
-    
-    replaceParentStatement:any = None
-    if parent_post.ParentPostId == None:
-        replaceParentStatement = turbo.replace(
-            render_template(
-                "includes/post.html",
-                user_name=session["user_name"],
-                post=parent_post,
-                lang=get_lang(session["language"]),
-            ),
-            f"post-{post_id}",
-        )
-    else:
-        replaceParentStatement = turbo.replace(
-            render_template(
-                "includes/comment.html",
-                user_name=session["user_name"],
-                post=parent_post,
-                lang=get_lang(session["language"]),
-            ),
-            f"comment-{post_id}",
-        )
 
-    turbo.push([
+    print(get_post(post_id).comments.__len__())
+    
+    turbo.push(turbo.update(
+        get_post(post_id).comments.__len__(),
+        f"comments-{post_id}",
+    ))
+    
+    turbo_id = None
+    if session["user_id"] in session_id_to_turbo_id:
+        turbo_id = session_id_to_turbo_id[session["user_id"]]
+
+    push_except(turbo,
         turbo.append(
             render_template("includes/comment_outer.html",
             post=post,
+            user_name=None,
             lang=get_lang(session["language"])),
             f".post-comments-{post_id}",
         multiple=True),
-        replaceParentStatement
-        ])
+        turbo_id
+    )
     
     if turbo.can_stream():
-        return turbo.stream(turbo.replace(
+        return turbo.stream([
+            turbo.replace(
                 render_template("includes/new_comment.html",
                 post={"id": post_id},
                 lang=get_lang(session["language"])),
                 f"post-comment-form-{post_id}"
-                ))
+            ),
+                    turbo.append(
+            render_template("includes/comment_outer.html",
+                post=post,
+                user_name=session["user_name"],
+                lang=get_lang(session["language"])),
+                f".post-comments-{post_id}",
+            multiple=True),
+        ])
     else:
         return redirect(url_for("index"))
 

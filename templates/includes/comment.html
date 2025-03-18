@@ -41,8 +41,10 @@
     data-bs-toggle="collapse"
     data-bs-target="#collapse1{{ uuid }}"
   >
-    <i class="bi bi-chat-left-dots"></i> {{lang['post_comments']}}
-    ({{post.comments|length}})
+    <i class="bi bi-chat-left-dots"></i> {{lang['post_comments']}} (<span
+      id="comments-{{post['id']}}"
+      >{{ post['comments']|length }}</span
+    >)
   </button>
   <!--Delete Button, only shows up when the user owns the post and the post isn't yet deleted-->
   {% if post['User']['UserName'] == user_name %}
