@@ -22,9 +22,9 @@ def create_post():
     db.session.commit()
 
     turbo.push(
-        turbo.prepend(
+        turbo.append(
             render_template(
-                "includes/post.html",
+                "includes/post_outer.html",
                 user_name=session["user_name"],
                 post=get_post(new_post.id),
                 lang=get_lang(session["language"]),
@@ -91,7 +91,7 @@ def like_post(post_id):
                 render_template(
                     "includes/comment.html",
                     user_name=session["user_name"],
-                    comment=get_comment(post_id),
+                    post=get_comment(post_id),
                     lang=get_lang(session["language"]),
                 ),
                 f"comment-{post_id}",
@@ -114,8 +114,25 @@ def create_comment(post_id):
     new_post = Post(session["user_id"], None, content, post_id)
     db.session.add(new_post)
     db.session.commit()
+    post = get_post(new_post.id)
 
-    return redirect(url_for("comments", post_id=post_id))
+    turbo.push(turbo.append(
+        render_template("includes/comment_outer.html",
+        post=post,
+        lang=get_lang(session["language"])),
+        f".post-comments-{post_id}",
+        multiple=True
+        ))
+    
+    if turbo.can_stream():
+        return turbo.stream(turbo.replace(
+                render_template("includes/new_comment.html",
+                post={"id": post_id},
+                lang=get_lang(session["language"])),
+                f"post-comment-form-{post_id}"
+                ))
+    else:
+        return redirect(url_for("index"))
 
 
 @post_blueprint.route("/delete_post/<int:post_id>", methods=["POST"])
@@ -138,7 +155,7 @@ def delete_post(post_id):
                 post=get_post(post_id),
                 lang=get_lang(session["language"]),
             ),
-            f"post-{post_id}",
+            f"post-{post_id}"
         )
     )
 
@@ -162,9 +179,9 @@ def repost(post_id):
     db.session.commit()
 
     turbo.push(
-        turbo.prepend(
+        turbo.append(
             render_template(
-                "includes/post.html",
+                "includes/post_outer.html",
                 user_name=session["user_name"],
                 post=get_post(repost.id),
                 lang=get_lang(session["language"]),

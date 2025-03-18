@@ -1,0 +1,15 @@
+{% if post.Title != "" and post.Content != "" %} {% with uuid=""|gen_uuid %}
+<div class="card mb-3 p-2">
+  {% include "includes/post.html" %}
+  <!-- comment section collapsable -->
+  <div>
+    <div class="collapse" id="collapse1{{ uuid }}">
+      <div class="post-comments-{{post.id}}">
+        {% for comment in post.comments %} {% with post=comment %} {% include
+        'includes/comment_outer.html' %} {% endwith %} {% endfor %}
+      </div>
+      {% include "includes/new_comment.html" %}
+    </div>
+  </div>
+</div>
+{% endwith %} {% endif %}

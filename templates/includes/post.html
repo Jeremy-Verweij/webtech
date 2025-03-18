@@ -1,7 +1,4 @@
-{% if post.Title != "" and post.Content != "" %}
-{% with uuid=""|gen_uuid %}
-<div id="post-{{post['id']}}" class="card mb-3">
-  {{post}}
+<div id="post-{{post['id']}}">
   <div class="card-body">
     <div class="d-flex">
       <a
@@ -16,8 +13,9 @@
         />&nbsp;
         <h5 class="ml-2 d-inline">{{ post['User']['UserName'] }}</h5>
       </a>
-      {% with date = post['creation_date'].strftime("%x") + " " + post['creation_date'].strftime("%H")
-      + ":" + post['creation_date'].strftime("%M")%}
+      {% with date = post['creation_date'].strftime("%x") + " " +
+      post['creation_date'].strftime("%H") + ":" +
+      post['creation_date'].strftime("%M")%}
       <span class="ml-2 text-end flex-fill">{{ date }} </span>
       {% endwith %}
     </div>
@@ -37,8 +35,9 @@
           />&nbsp;
           <h5 class="ml-2 d-inline">{{ post['Repost']['UserName'] }}</h5>
         </a>
-        {% with date = post['Repost']['creation_date'].strftime("%x") + " " + post['Repost']['creation_date'].strftime("%H")
-      + ":" + post['Repost']['creation_date'].strftime("%M")%}
+        {% with date = post['Repost']['creation_date'].strftime("%x") + " " +
+        post['Repost']['creation_date'].strftime("%H") + ":" +
+        post['Repost']['creation_date'].strftime("%M")%}
         <span class="nl-2 text-end flex-fill">{{date}}</span>
         {% endwith %}
       </div>
@@ -61,36 +60,39 @@
     <p>{{lang['post_deleted']}}</p>
     {% else %}
     <p>{{ post['Content'] }}</p>
-    {% endif %}
-
+    {% endif %} {% with button_disabled = "disabled" if post.Content == None or
+    post.Title == None else "" %}
     <!-- Like Button -->
     <form
       action="{{ url_for('post.like_post', post_id=post['id']) }}"
       method="POST"
       class="d-inline"
+      {{button_disabled}}
     >
-      <button {{"disabled" if post.Content == None or
-    post.Title == None else ""}} type="submit" class="btn btn-sm btn-outline-primary border-2">
-        <i class="bi bi-heart"></i> {{lang['post_like']}} ({{ post['likes']|length }})
+      <button type="submit" class="btn btn-sm btn-outline-primary border-2">
+        <i class="bi bi-heart"></i> {{lang['post_like']}} ({{
+        post['likes']|length }})
       </button>
     </form>
 
     <!--Comments Button-->
-    <!-- <a class="btn btn-sm btn-outline-info border-2" role="button" href="{{url_for('comments', post_id=post['id'])}}"
-      ><i class="bi bi-chat-left-dots"></i> {{lang['post_comments']}}</a
-    > -->
-    <button class="btn btn-sm btn-outline-info" type="button" data-bs-toggle="collapse" data-bs-target="#collapse1{{ uuid }}">
-      <i class="bi bi-chat-left-dots"></i> {{lang['post_comments']}} ({{post.comments|length}})
+    <button
+      class="btn btn-sm btn-outline-info"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#collapse1{{ uuid }}"
+    >
+      <i class="bi bi-chat-left-dots"></i> {{lang['post_comments']}}
+      ({{post.comments|length}})
     </button>
 
     <!-- Repost Button -->
     <!-- Uses a small bit of js(onclick) to set the right url for the modal(popup) 
-     It basically gets the form from the dom and then it sets the action to the correct url
-    -->
+      It basically gets the form from the dom and then it sets the action to the correct url
+      -->
     <button
       type="button"
-      {{"disabled" if post.Content == None or
-      post.Title == None else ""}}
+      {{button_disabled}}
       class="btn btn-sm btn-outline-success border-2"
       data-bs-toggle="modal"
       data-bs-target="#repostModal"
@@ -108,25 +110,12 @@
     >
       <button
         type="submit"
-        {{"disabled" if post.Content == None or
-    post.Title == None else ""}}
+        {{button_disabled}}
         class="btn btn-sm btn-outline-danger border-2"
       >
         <i class="bi bi-trash"></i> {{lang['post_delete']}}
       </button>
     </form>
-    {% endif %}
-    <!-- comment section collapsable -->
-    <div>
-      <div class="collapse" id="collapse1{{ uuid }}">
-        {% for comment in post.comments %} 
-          {% with post=comment %}   
-            {% include 'includes/post.html' %} 
-          {% endwith %} 
-        {% endfor %}
-      </div>
-    </div>
+    {% endif %} {% endwith %}
   </div>
 </div>
-{% endwith %}
-{% endif %}

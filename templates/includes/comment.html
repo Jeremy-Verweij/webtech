@@ -1,32 +1,40 @@
-<div class="card mb-3 p-3" id="comment-{{comment.CommentID}}">
-	<div class="d-flex mb-2">
-		<a
-			class="text-reset text-decoration-none"
-			href="/profile/{{comment.UserID}}"
-		>
-			<img
-				src="{{ url_for('profile_picture', user_id=comment.UserID) }}"
-				class="rounded-circle d-inline"
-				width="40"
-				height="40"
-			/>&nbsp;
-			<h5 class="ml-2 d-inline">{{ comment['UserName'] }}</h5>
-		</a>
-		{% with date = comment['Date'].strftime("%x") + " " +
-		comment['Date'].strftime("%H") + ":" + comment['Date'].strftime("%M")%}
-		<span class="ml-2 text-end flex-fill">{{ date }} </span>
-		{% endwith %}
-	</div>
+<div id="comment-{{post.id}}">
+  <div class="d-flex mb-2">
+    <a class="text-reset text-decoration-none" href="/profile/{{post.UserId}}">
+      <img
+        src="{{ url_for('profile_picture', user_id=post.UserId) }}"
+        class="rounded-circle d-inline"
+        width="40"
+        height="40"
+      />&nbsp;
+      <h5 class="ml-2 d-inline">{{ post['UserName'] }}</h5>
+    </a>
+    {% with date = post['creation_date'].strftime("%x") + " " +
+    post['creation_date'].strftime("%H") + ":" +
+    post['creation_date'].strftime("%M")%}
+    <span class="ml-2 text-end flex-fill">{{ date }} </span>
+    {% endwith %}
+  </div>
 
-	<p>{{comment.Content}}</p>
+  <p>{{post.Content}}</p>
 
-	<form
-		action="{{ url_for('post.like_post', post_id=comment['CommentID']) }}"
-		method="POST"
-		class="d-inline"
-	>
-		<button type="submit" class="btn btn-sm btn-outline-primary border-2">
-			<i class="bi bi-heart"></i> {{lang['post_like']}} ({{ comment['Likes'] }})
-		</button>
-	</form>
+  <form
+    action="{{ url_for('post.like_post', post_id=post['id']) }}"
+    method="POST"
+    class="d-inline"
+  >
+    <button type="submit" class="btn btn-sm btn-outline-primary border-2">
+      <i class="bi bi-heart"></i> {{lang['post_like']}} ({{ post['likes']|length
+      }})
+    </button>
+  </form>
+  <button
+    class="btn btn-sm btn-outline-info"
+    type="button"
+    data-bs-toggle="collapse"
+    data-bs-target="#collapse1{{ uuid }}"
+  >
+    <i class="bi bi-chat-left-dots"></i> {{lang['post_comments']}}
+    ({{post.comments|length}})
+  </button>
 </div>

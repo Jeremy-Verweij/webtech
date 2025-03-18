@@ -9,8 +9,9 @@
   </div>
 
   <!-- Posts Feed -->
-  <div id="posts">
-    {% for post in posts %} {% include 'includes/post.html' %} {% endfor %}
+  <div id="posts" class="pb-1">
+    {% for post in posts %} {% include 'includes/post_outer.html' %} {% endfor
+    %}
   </div>
   {% include "includes/repost.html" %}
 </div>
