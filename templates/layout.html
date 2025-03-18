@@ -1,19 +1,8 @@
 {% extends 'boiler_plate.html' %} {% block header %}
 <title>Web App</title>
-<!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"> -->
-<style>
-  body.dark-mode {
-    background-color: #121212;
-    color: white;
-  }
-  .dark-mode .card {
-    background-color: #333;
-    color: white;
-  }
-</style>
 {% endblock %} {% block body %}
 <body
-  class="overflow-hidden {{ 'dark-mode' if session.get('dark_mode') else '' }}"
+  class="overflow-hidden"
 >
   <div class="d-flex flex-column vh-100">
     <div
