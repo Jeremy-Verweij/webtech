@@ -61,7 +61,6 @@ def create_post():
     else:
         return redirect(url_for("index"))
 
-
 # Like Post
 @post_blueprint.route("/like_post/<int:post_id>", methods=["POST"])
 def like_post(post_id):
@@ -101,8 +100,6 @@ def like_post(post_id):
     else:
         return redirect(url_for("index"))
 
-
-# TODO: FIX DELETE BTN
 @post_blueprint.route("/create_comment/<int:post_id>", methods=["POST"])
 def create_comment(post_id):
     if "user_id" not in session:
@@ -156,7 +153,6 @@ def create_comment(post_id):
     else:
         return redirect(url_for("index"))
 
-
 @post_blueprint.route("/delete_post/<int:post_id>", methods=["POST"])
 def delete_post(post_id):
     if "user_id" not in session:
@@ -171,9 +167,10 @@ def delete_post(post_id):
 
     post = db.session.query(Post).where(Post.id == post_id).one_or_none()
     
+    delete_post_client = None
+    
     if post.ParentPostId == None:
-        turbo.push(
-            turbo.replace(
+        delete_post_client = turbo.replace(
                 render_template(
                     "includes/post.html",
                     user_name=session["user_name"],
@@ -182,10 +179,8 @@ def delete_post(post_id):
                 ),
                 f"post-{post_id}",
             )
-        )
     else:
-        turbo.push(
-            turbo.replace(
+        delete_post_client = turbo.replace(
                 render_template(
                     "includes/comment.html",
                     user_name=session["user_name"],
@@ -194,13 +189,11 @@ def delete_post(post_id):
                 ),
                 f"comment-{post_id}",
             )
-        )
 
     if turbo.can_stream():
-        return turbo.stream(turbo.remove("unused_id"))
+        return turbo.stream(delete_post_client)
     else:
         return redirect(url_for("index"))
-
 
 # Repost
 @post_blueprint.route("/repost/<int:post_id>", methods=["POST"])

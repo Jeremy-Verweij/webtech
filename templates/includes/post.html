@@ -55,11 +55,11 @@
     {% endif %} {% if post['Title'] == None %}
     <h6 class="mt-2">{{lang['post_deleted']}}</h6>
     {% else %}
-    <h6 class="mt-2">{{ post['Title'] }}</h6>
+    <h6 id="title-{{post['id']}}" class="mt-2">{{ post['Title'] }}</h6>
     {% endif %} {% if post['Content'] == None %}
     <p>{{lang['post_deleted']}}</p>
     {% else %}
-    <p>{{ post['Content'] }}</p>
+    <p id="content-{{post['id']}}">{{ post['Content'] }}</p>
     {% endif %} {% with button_disabled = "disabled" if post.Content == None or
     post.Title == None else "" %}
     <!-- Like Button -->

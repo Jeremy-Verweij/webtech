@@ -19,7 +19,7 @@
   {% if post['Content'] == None %}
   <p>{{lang['post_deleted']}}</p>
   {% else %}
-  <p>{{ post['Content'] }}</p>
+  <p id="content-{{post['id']}}">{{ post['Content'] }}</p>
   {% endif %} {% with button_disabled = "disabled" if post.Content == None else
   "" %}
 
