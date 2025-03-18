@@ -2,7 +2,7 @@ import io
 from flask import make_response, render_template, request, redirect, url_for, session
 import os
 
-from sqlalchemy import func, and_, update
+from sqlalchemy import func, and_, select, update
 from sqlalchemy.orm import aliased
 from setup import app, db
 from models import *
@@ -31,7 +31,6 @@ def index():
         
     Repost = aliased(Post)
     RepostUser = aliased(User)
-    user_repost_likes = aliased(user_post_likes)
         
     posts = db.session.query(\
             Post.id.label("PostID"), \
@@ -55,7 +54,47 @@ def index():
         .group_by(Post.id, Repost.id) \
         .all()
 
-    return render_template('index.html', user_name=session['user_name'], posts=posts, lang=get_lang(session['language']))
+    return render_template('index.html', user_name=session['user_name'], posts=posts, show_extra_buttons=True, lang=get_lang(session['language']))
+
+@app.route('/comments/<int:post_id>')
+def comments(post_id):
+    if 'user_id' not in session:
+        return redirect(url_for('auth.login'))
+    
+    if 'language' not in session:
+        session['language'] = default_lang
+        
+    Repost = aliased(Post)
+    RepostUser = aliased(User)
+        
+    post = db.session.query(\
+            Post.id.label("PostID"), \
+            Post.UserId.label("UserID"), \
+            Post.Title.label("Title"), \
+            Post.Content.label("Content"), \
+            Post.creation_date.label("Date"), \
+            User.UserName.label("UserName"), \
+            func.count(user_post_likes.c.PostId).label("Likes"), \
+            Repost.Title.label('RepostTitle'), \
+            Repost.Content.label('RepostContent'), \
+            Repost.UserId.label('RepostUserId'), \
+            Repost.creation_date.label('RepostDate'), \
+            RepostUser.UserName.label('RepostUserName')) \
+        .outerjoin(user_post_likes, user_post_likes.c.PostId == Post.id) \
+        .outerjoin(Repost, Repost.id == Post.RepostId)\
+        .outerjoin(RepostUser, RepostUser.id == Repost.UserId) \
+        .join(User, User.id == Post.UserId) \
+        .where(Post.id == post_id) \
+        .group_by(Post.id, Repost.id) \
+        .one_or_none()
+
+    comments1 = db.session.query(\
+        Post.id.label("CommentID"), \
+        Post.Content.label("Content")) \
+    .where(Post.ParentPostId == post_id) \
+    .all()
+    
+    return render_template('comments.html', post=post, show_extra_buttons=False, comments=comments1, lang=get_lang(session['language']))
 
 @app.route('/profile/<int:user_id>')
 def profile(user_id):
@@ -117,6 +156,19 @@ def like_post(post_id):
     db.session.commit()
 
     return redirect(url_for('index'))
+
+@app.route('/create_comment/<int:post_id>', methods=['POST'])
+def create_comment(post_id):
+    if 'user_id' not in session:
+        return redirect(url_for('auth.login'))
+    
+    content = request.form.get('content')
+
+    new_post = Post(session["user_id"], None, content, post_id)
+    db.session.add(new_post)
+    db.session.commit()
+
+    return redirect(url_for('comments', post_id=post_id))
 
 @app.route('/delete_post/<int:post_id>', methods=['POST'])
 def delete_post(post_id):
