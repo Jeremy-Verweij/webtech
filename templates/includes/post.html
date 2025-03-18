@@ -67,7 +67,6 @@
       action="{{ url_for('post.like_post', post_id=post['id']) }}"
       method="POST"
       class="d-inline"
-      {{button_disabled}}
     >
       <button type="submit" class="btn btn-sm btn-outline-primary border-2">
         <i class="bi bi-heart"></i> {{lang['post_like']}} ({{
