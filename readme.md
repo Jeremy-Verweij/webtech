@@ -1,3 +1,9 @@
+## Installing dependencies
+
+```bash
+    pip install -r requirements.txt
+```
+
 ## Database migration
 
 for first Initialization only:
