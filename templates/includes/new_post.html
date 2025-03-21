@@ -1,23 +1,23 @@
-<form action="{{ url_for('create_post') }}" id="new_post" method="POST">
-    <div class="form-group my-2">
-      <input
-        type="text"
-        class="form-control"
-        name="title"
-        placeholder="{{lang['new_post_title']}}"
-        required
-      />
-    </div>
-    <div class="form-group my-2">
-      <textarea
-        class="form-control"
-        name="content"
-        rows="3"
-        placeholder="{{lang['new_post_content']}}"
-        required
-      ></textarea>
-    </div>
-    <button type="submit" class="btn btn-primary my-2">
-      {{lang['new_post_post']}}
-    </button>
-  </form>
+<form action="{{ url_for('post.create_post') }}" id="new_post" method="POST">
+	<div class="form-group my-2">
+		<input
+			type="text"
+			class="form-control"
+			name="title"
+			placeholder="{{lang['new_post_title']}}"
+			required
+		/>
+	</div>
+	<div class="form-group my-2">
+		<textarea
+			class="form-control"
+			name="content"
+			rows="3"
+			placeholder="{{lang['new_post_content']}}"
+			required
+		></textarea>
+	</div>
+	<button type="submit" class="btn btn-primary my-2">
+		{{lang['new_post_post']}}
+	</button>
+</form>

@@ -5,6 +5,7 @@ from sqlalchemy.orm import Mapped
 from setup import db
 from .Like import user_post_likes
 
+
 class Post(db.Model):
     __tablename__ = "posts"
 
@@ -16,17 +17,24 @@ class Post(db.Model):
     UserId: Mapped[int] = db.Column(
         db.Integer, db.ForeignKey("users.id"), nullable=False
     )
-    # User: Mapped["User"] = db.relationship(
-    #     back_populates="posts", foreign_keys=[UserId]
-    # )
+    User: Mapped["User"] = db.relationship(
+        back_populates="posts", foreign_keys=[UserId]
+    )
 
     ParentPostId: Mapped[int] = db.Column(db.Integer, db.ForeignKey("posts.id"))
-
-    comments: Mapped[List["Post"]] = db.relationship(foreign_keys=[ParentPostId])
+    parent_post = db.relationship(
+        "Post", back_populates="comments", remote_side=[id], foreign_keys=[ParentPostId]
+    )
+    comments: Mapped[List["Post"]] = db.relationship(
+        "Post",
+        back_populates="parent_post",
+        foreign_keys=[ParentPostId],
+    )
 
     RepostId: Mapped[int] = db.mapped_column(db.Integer, db.ForeignKey("posts.id"))
+    Repost = db.relationship("Post", remote_side=[id], foreign_keys=[RepostId])
 
-    likes: Mapped[List["User"]] = db.relationship( # type: ignore
+    likes: Mapped[List["User"]] = db.relationship(
         "User", secondary=user_post_likes, back_populates="liked_posts"
     )
 
