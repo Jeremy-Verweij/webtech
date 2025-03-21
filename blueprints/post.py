@@ -205,8 +205,33 @@ def repost(post_id):
     db.session.add(repost)
     db.session.commit()
 
-    turbo.push(
+    turbo_id = None
+    if session["user_id"] in session_id_to_turbo_id:
+        turbo_id = session_id_to_turbo_id[session["user_id"]]
+
+    push_except(
+        turbo,
         turbo.prepend(
+            render_template(
+                "includes/post_outer.html",
+                user_name=None,
+                post=get_post(repost.id),
+                lang=get_lang(session["language"]),
+            ),
+            "posts",
+        ),
+        turbo_id
+    )
+
+    if turbo.can_stream():
+        return turbo.stream(
+            [turbo.replace(
+                render_template(
+                    "includes/repost.html", lang=get_lang(session["language"])
+                ),
+                "repostModal",
+            ),
+            turbo.prepend(
             render_template(
                 "includes/post_outer.html",
                 user_name=session["user_name"],
@@ -214,17 +239,7 @@ def repost(post_id):
                 lang=get_lang(session["language"]),
             ),
             "posts",
-        )
-    )
-
-    if turbo.can_stream():
-        return turbo.stream(
-            turbo.replace(
-                render_template(
-                    "includes/repost.html", lang=get_lang(session["language"])
-                ),
-                "repostModal",
-            )
+        )]
         )
     else:
         return redirect(url_for("index"))
