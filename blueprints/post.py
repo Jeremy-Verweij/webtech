@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, redirect, request, session, url_fo
 from sqlalchemy import and_, update
 from setup import db, turbo
 from models import *
-from utils.db_helpers import get_comment, get_post
+from utils.db_helpers import get_post
 from utils.lang import get_lang
 from utils.turbo_helper import push_except, session_id_to_turbo_id
 
@@ -25,13 +25,15 @@ def create_post():
     turbo_id = None
     if session["user_id"] in session_id_to_turbo_id:
         turbo_id = session_id_to_turbo_id[session["user_id"]]
+    else:
+        redirect(url_for("index"))
 
     push_except(turbo,
             turbo.prepend(
                 render_template(
                     "includes/post_outer.html",
                     user_name=None,
-                    post=get_post(new_post.id),
+                    post=new_post,
                     lang=get_lang(session["language"]),
                 ),
                 "posts"
@@ -45,7 +47,7 @@ def create_post():
                 render_template(
                     "includes/post_outer.html",
                     user_name=session["user_name"],
-                    post=get_post(new_post.id),
+                    post=new_post,
                     lang=get_lang(session["language"]),
                 ),
                 "posts",
@@ -109,7 +111,6 @@ def create_comment(post_id):
     new_post = Post(session["user_id"], None, content, post_id)
     db.session.add(new_post)
     db.session.commit()
-    post = get_post(new_post.id)
 
     turbo.push(turbo.update(
         get_post(post_id).comments.__len__(),
@@ -119,11 +120,13 @@ def create_comment(post_id):
     turbo_id = None
     if session["user_id"] in session_id_to_turbo_id:
         turbo_id = session_id_to_turbo_id[session["user_id"]]
+    else:
+        redirect(url_for("index"))
 
     push_except(turbo,
-        turbo.prepend(
+        turbo.append(
             render_template("includes/comment_outer.html",
-            post=post,
+            post=new_post,
             user_name=None,
             lang=get_lang(session["language"])),
             f".post-comments-{post_id}",
@@ -139,9 +142,9 @@ def create_comment(post_id):
                 lang=get_lang(session["language"])),
                 f"post-comment-form-{post_id}"
             ),
-                    turbo.prepend(
+            turbo.append(
             render_template("includes/comment_outer.html",
-                post=post,
+                post=new_post,
                 user_name=session["user_name"],
                 lang=get_lang(session["language"])),
                 f".post-comments-{post_id}",
@@ -162,33 +165,19 @@ def delete_post(post_id):
     )
     db.session.commit()
 
-    post = db.session.query(Post).where(Post.id == post_id).one_or_none()
-    
-    delete_post_client = None
-    
-    if post.ParentPostId == None:
-        delete_post_client = turbo.replace(
-                render_template(
-                    "includes/post.html",
-                    user_name=session["user_name"],
-                    post=get_post(post_id),
-                    lang=get_lang(session["language"]),
-                ),
-                f"post-{post_id}",
-            )
-    else:
-        delete_post_client = turbo.replace(
-                render_template(
-                    "includes/comment.html",
-                    user_name=session["user_name"],
-                    post=get_comment(post_id),
-                    lang=get_lang(session["language"]),
-                ),
-                f"comment-{post_id}",
-            )
+    turbo.push([
+        turbo.update(
+            "Deleted",
+            f"title-{post_id}"
+        ),
+        turbo.update(
+            "Deleted",
+            f"content-{post_id}"
+        )
+    ])
 
     if turbo.can_stream():
-        return turbo.stream(delete_post_client)
+        return turbo.stream(turbo.remove("unused_id"))
     else:
         return redirect(url_for("index"))
 
@@ -208,6 +197,8 @@ def repost(post_id):
     turbo_id = None
     if session["user_id"] in session_id_to_turbo_id:
         turbo_id = session_id_to_turbo_id[session["user_id"]]
+    else:
+        redirect(url_for("index"))
 
     push_except(
         turbo,
@@ -223,23 +214,4 @@ def repost(post_id):
         turbo_id
     )
 
-    if turbo.can_stream():
-        return turbo.stream(
-            [turbo.replace(
-                render_template(
-                    "includes/repost.html", lang=get_lang(session["language"])
-                ),
-                "repostModal",
-            ),
-            turbo.prepend(
-            render_template(
-                "includes/post_outer.html",
-                user_name=session["user_name"],
-                post=get_post(repost.id),
-                lang=get_lang(session["language"]),
-            ),
-            "posts",
-        )]
-        )
-    else:
-        return redirect(url_for("index"))
+    return redirect(url_for("index"))
