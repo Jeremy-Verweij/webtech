@@ -1,25 +1,67 @@
 {% extends 'boiler_plate.html' %} {% block header %}
-<title>Web App</title>
-{% endblock %} {% block body %}
+<title>Chirpify</title>
+{% block extra_header %}{% endblock %} {% endblock %} {% block body %}
 <body
   class="overflow-hidden {{ 'dark-mode' if session.get('dark_mode') else '' }}"
 >
   <div class="d-flex flex-column vh-100">
-    <div class="header bg-primary text-white p-0 d-flex justify-content-between align-items-center" style="height: 100px;">
+    <div
+      class="header bg-primary text-white p-0 d-flex justify-content-between align-items-center"
+      style="height: 100px"
+    >
       <a href="{{ url_for('index') }}">
-        <img src="{{ url_for('static', filename='Chirpify.png') }}" class="d-inline-block align-text-top p-0 m-0" style="width: 150px; height: 150px;"/>
+        <img
+          src="{{ url_for('static', filename='Chirpify.png') }}"
+          class="d-inline-block align-text-top p-0 m-0"
+          style="width: 150px; height: 150px"
+        />
       </a>
 
       <!-- CSS Dropdown Menu -->
       <div class="dropdown m-3">
-        <button class="btn btn-light btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-          <img src="{{ url_for('profile_picture', user_id=session['user_id']) }}" alt="Profile Picture" class="rounded-circle" width="40" height="40" />
+        <button
+          class="btn btn-light btn-secondary dropdown-toggle"
+          type="button"
+          data-bs-toggle="dropdown"
+          aria-expanded="false"
+        >
+          <img
+            src="{{ url_for('profile_picture', user_id=session['user_id']) }}"
+            alt="Profile Picture"
+            class="rounded-circle"
+            width="40"
+            height="40"
+          />
+          &nbsp; {{session["user_name"]}}
         </button>
         <ul class="dropdown-menu">
-          <li><a class="dropdown-item" href="{{ url_for('profile', user_id=session.get('user_id')) }}"><i class="bi bi-person"></i> {{ lang['header_profile'] }}</a></li>
-          <li><a class="dropdown-item" href="{{ url_for('edit_profile') }}"><i class="bi bi-pencil-square"></i> {{ lang['header_edit_profile'] }}</a></li>
-          <li><a class="dropdown-item" href="{{ url_for('settings') }}"><i class="bi bi-gear"></i> {{ lang['header_settings'] }}</a></li>
-          <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}" class="text-danger"><i class="bi bi-box-arrow-right"></i> {{ lang['header_logout'] }}</a></li>
+          <li>
+            <a
+              class="dropdown-item"
+              href="{{ url_for('profile', user_id=session.get('user_id')) }}"
+              ><i class="bi bi-person"></i> {{ lang['header_profile'] }}</a
+            >
+          </li>
+          <li>
+            <a class="dropdown-item" href="{{ url_for('edit_profile') }}"
+              ><i class="bi bi-pencil-square"></i> {{
+              lang['header_edit_profile'] }}</a
+            >
+          </li>
+          <li>
+            <a class="dropdown-item" href="{{ url_for('settings') }}"
+              ><i class="bi bi-gear"></i> {{ lang['header_settings'] }}</a
+            >
+          </li>
+          <li>
+            <a
+              class="dropdown-item"
+              href="{{ url_for('auth.logout') }}"
+              class="text-danger"
+              ><i class="bi bi-box-arrow-right"></i> {{ lang['header_logout']
+              }}</a
+            >
+          </li>
         </ul>
       </div>
     </div>

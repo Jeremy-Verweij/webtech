@@ -1,4 +1,5 @@
-{% extends 'layout.html' %} {% block content %}
+{% extends 'layout.html' %} {% block extra_header %} {{ turbo() }}{% endblock %}
+{% block content %}
 <div class="container mt-4">
   <h1>{{lang['welcome_title']}} {{ user_name }}!</h1>
   <p>{{lang['welcome_sub_title']}}</p>
@@ -9,8 +10,9 @@
   </div>
 
   <!-- Posts Feed -->
-  <div id="posts">
-    {% for post in posts %} {% include 'includes/post.html' %} {% endfor %}
+  <div id="posts" class="pb-5">
+    {% for post in posts | reverse%} {% include 'includes/post_outer.html' %} {%
+    endfor %}
   </div>
   {% include "includes/repost.html" %}
 </div>

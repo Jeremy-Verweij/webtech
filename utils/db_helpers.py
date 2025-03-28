@@ -16,22 +16,7 @@ def get_post(post_id):
 
 
 def get_comment(comment_id):
-    return (
-        db.session.query(
-            Post.id.label("CommentID"),
-            Post.creation_date.label("Date"),
-            Post.UserId.label("UserID"),
-            func.count(user_post_likes.c.PostId).label("Likes"),
-            User.UserName.label("UserName"),
-            Post.Content.label("Content"),
-        )
-        .where(Post.id == comment_id)
-        .join(User, User.id == Post.UserId)
-        .outerjoin(user_post_likes, user_post_likes.c.PostId == Post.id)
-        .group_by(Post.id)
-        .order_by(Post.creation_date.desc())
-        .one_or_none()
-    )
+    return get_post(comment_id)
 
 
 def get_comments(post_id):

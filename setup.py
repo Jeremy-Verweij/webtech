@@ -6,6 +6,8 @@ from flask_migrate import Migrate
 from sqlalchemy import MetaData
 from turbo_flask import Turbo
 
+from utils.format_content import format_content
+
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 app = Flask(__name__)
@@ -23,3 +25,8 @@ metadata = MetaData(naming_convention=convention)
 
 db = SQLAlchemy(app, metadata=metadata)
 migrate = Migrate(app, db)
+
+@app.context_processor
+def custom_template_function():
+        
+    return dict(format_content = format_content)

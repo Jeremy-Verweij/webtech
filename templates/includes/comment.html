@@ -1,18 +1,65 @@
-<p>{{comment.Content}}</p>
-<form
-  action="{{url_for('create_comment', post_id=comment.CommentID)}}"
-  method="post"
->
-  <div class="input-group">
-    <input
-      type="text"
-      class="form-control d-inline"
-      name="content"
-      placeholder="{{lang['new_comment_content']}}"
-      required
-    />
-    <button type="submit" class="btn btn-primary d-inline px-4">
-      {{lang['new_post_post']}}
-    </button>
+<div id="comment-{{post.id}}">
+  <div class="d-flex mb-2">
+    <a class="text-reset text-decoration-none" href="/profile/{{post.UserId}}">
+      <img
+        src="{{ url_for('profile_picture', user_id=post.UserId) }}"
+        class="rounded-circle d-inline"
+        width="40"
+        height="40"
+      />&nbsp;
+      <h5 class="ml-2 d-inline">{{ post['User']['UserName'] }}</h5>
+    </a>
+    {% with date = post['creation_date'].strftime("%x") + " " +
+    post['creation_date'].strftime("%H") + ":" +
+    post['creation_date'].strftime("%M")%}
+    <span class="ml-2 text-end flex-fill">{{ date }} </span>
+    {% endwith %}
   </div>
-</form>
+
+  {% if post['Content'] == None %}
+  <p>{{lang['post_deleted']}}</p>
+  {% else %} {% autoescape false %}
+  <p id="content-{{post['id']}}">{{ format_content(post['Content']) }}</p>
+  {% endautoescape %} {% endif %} {% with button_disabled = "disabled" if
+  post.Content == None else "" %}
+
+  <form
+    action="{{ url_for('post.like_post', post_id=post['id']) }}"
+    method="POST"
+    class="d-inline"
+  >
+    <button type="submit" class="btn btn-sm btn-outline-primary border-2">
+      <i class="bi bi-heart"></i> {{lang['post_like']}} (<span
+        id="likes-{{post['id']}}"
+        >{{ post['likes']|length }}</span
+      >)
+    </button>
+  </form>
+  <button
+    class="btn btn-sm btn-outline-info border-2"
+    type="button"
+    data-bs-toggle="collapse"
+    data-bs-target="#collapse1{{ uuid }}"
+  >
+    <i class="bi bi-chat-left-dots"></i> {{lang['post_comments']}} (<span
+      id="comments-{{post['id']}}"
+      >{{ post['comments']|length }}</span
+    >)
+  </button>
+  <!--Delete Button, only shows up when the user owns the post and the post isn't yet deleted-->
+  {% if post['User']['UserName'] == user_name %}
+  <form
+    action="{{ url_for('post.delete_post', post_id=post['id']) }}"
+    method="POST"
+    class="d-inline"
+  >
+    <button
+      type="submit"
+      {{button_disabled}}
+      class="btn btn-sm btn-outline-danger border-2"
+    >
+      <i class="bi bi-trash"></i> {{lang['post_delete']}}
+    </button>
+  </form>
+  {% endif %} {% endwith %}
+</div>

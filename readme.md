@@ -1,3 +1,9 @@
+## Installing dependencies
+
+```bash
+    pip install -r requirements.txt
+```
+
 ## Database migration
 
 for first Initialization only:
@@ -18,4 +24,18 @@ for creating a migration script:
 
 ```bash
     flask db downgrade
+```
+
+## Setting up server for public acces
+
+for starting server
+
+```bash
+    flask run
+```
+
+for making server public
+
+```bash
+    ssh -p 443 -R0:127.0.0.1:5000 qr@a.pinggy.io
 ```
