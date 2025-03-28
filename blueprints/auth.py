@@ -17,7 +17,8 @@ def login():
         if user and user.passwordHash == password:
             session["user_id"] = user.id
             session["user_name"] = user.UserName
-
+            session.modified = True
+            
             return redirect(url_for('index'))  
         else:
             return render_template('login.html', error="Invalid credentials.")
@@ -46,7 +47,8 @@ def register():
         user = db.session.query(User).filter(User.EmailAdress == email).one_or_none()
         session["user_id"] = user.id
         session["user_name"] = user.UserName
-
+        session.modified = True
+        
         return redirect(url_for('index'))  
 
     return render_template('register.html', email="", username="", password="", repeat_password="")
@@ -55,4 +57,5 @@ def register():
 @auth_blueprint.route('/logout')
 def logout():
     session.clear()  
+    session.modified = True
     return redirect(url_for('auth.login'))  

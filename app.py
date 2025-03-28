@@ -41,6 +41,7 @@ def index():
         session["dark_mode"] = user_settings.DarkMode
     else:
         session["dark_mode"] = False
+    session.modified = True
 
     posts = get_posts()
 

@@ -28,6 +28,8 @@ def settings():
 
     if "language" not in session:
         session["language"] = default_lang
+        
+    session.modified = True
 
     return render_template(
         "settings.html",
@@ -68,6 +70,7 @@ def edit_profile():
         db.session.commit()
 
         session["user_name"] = username
+        session.modified = True
         return redirect(url_for("settings.edit_profile"))
 
     if "language" not in session:
@@ -96,7 +99,7 @@ def toggle_dark_mode():
     db.session.commit()
 
     session["dark_mode"] = user_settings.DarkMode
-
+    session.modified = True
     return redirect(url_for("settings.settings"))
 
 @settings_blueprint.route("/change_language", methods=["POST"])
@@ -116,5 +119,5 @@ def change_language():
         db.session.add(new_settings)
     db.session.commit()
     session["language"] = language
-
+    session.modified = True
     return redirect(url_for("settings.settings"))

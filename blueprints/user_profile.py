@@ -69,6 +69,7 @@ def profile(user_id):
 
     if "language" not in session:
         session["language"] = default_lang
+        session.modified = True
 
     return render_template(
         "profile.html",
