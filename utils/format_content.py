@@ -1,6 +1,5 @@
 import re
 
-
 def url_to_html(match):
         url = match.group(0)
         if re.search(r'\.(png|jpg|jpeg|gif|bmp|webp)$', url, re.IGNORECASE):

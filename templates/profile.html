@@ -9,7 +9,7 @@
         </div>
         <div class="card-body text-center">
           <img
-            src="{{ url_for('profile_picture', user_id=user.id) }}"
+            src="{{ url_for('user_profile.profile_picture', user_id=user.id) }}"
             class="rounded-circle"
             width="150"
             height="150"
@@ -29,7 +29,7 @@
 
           {% if user.id != session['user_id'] %}
           <form
-            action="{{ url_for('follow_user', user_id=user.id) }}"
+            action="{{ url_for('user_profile.follow_user', user_id=user.id) }}"
             method="post"
           >
             <button
@@ -70,7 +70,7 @@
               class="text-decoration-none"
             >
               <img
-                src="{{ url_for('profile_picture', user_id=followed.id) }}"
+                src="{{ url_for('user_profile.profile_picture', user_id=followed.id) }}"
                 class="rounded-circle"
                 width="40"
                 height="40"
