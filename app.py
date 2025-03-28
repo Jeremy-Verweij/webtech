@@ -1,5 +1,5 @@
 import os
-from flask import render_template, request, redirect, url_for, session
+from flask import render_template, redirect, url_for, session
 from setup import app, db
 from models import *
 from blueprints import *
@@ -36,8 +36,6 @@ def index():
         .where(Settings.UserId == session["user_id"])
         .one_or_none()
     )
-
-    print(session)
 
     if user_settings:
         session["dark_mode"] = user_settings.DarkMode
