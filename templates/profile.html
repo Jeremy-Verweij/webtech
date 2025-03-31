@@ -43,21 +43,16 @@
       </div>
 
       <div class="mt-4">
-        <h4>{{lang['profile_recent_posts']}}</h4>
-        {% for post in posts %} {% if post.Title != None and post.Content !=
-        None and post.Title != "" and post.Content != "" %}
-        <div class="card mt-3">
-          <div class="card-body">
-            <h5>{{ post.Title }}</h5>
-            <p>{{ post.Content }}</p>
-            <small class="text-muted"
-              >{{lang['profile_likes']}}: {{ post.Likes }}</small
-            >
-          </div>
+        <h4>{{lang['profile_recent_posts']}}</h4> 
+        <div id="posts" class="pb-5">
+          {% if posts|length > 0 %}
+            {% for post in posts | reverse%} {% include 'includes/post_outer.html' %} {%
+            endfor %}
+          {% else %}
+          <p class="text-muted">{{lang['profile_no_posts']}}</p>
+          {% endif %}
         </div>
-        {% endif %} {% else %}
-        <p class="text-muted">{{lang['profile_no_posts']}}</p>
-        {% endfor %}
+        {% include "includes/repost.html" %}
       </div>
 
       <div class="mt-4">

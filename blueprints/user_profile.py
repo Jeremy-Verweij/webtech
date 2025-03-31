@@ -1,6 +1,7 @@
 from io import BytesIO
 from flask import Blueprint, make_response, redirect, url_for, session, render_template
 from sqlalchemy import and_
+from utils.db_helpers import get_posts_from_user
 from utils.lang import get_lang, lang_names, default_lang
 from setup import db
 from models import *
@@ -38,16 +39,9 @@ def profile_picture(user_id):
 @user_profile_blueprint.route("/profile/<int:user_id>")
 @login_required
 def profile(user_id):
-    if "user_id" not in session:
-        return redirect(url_for("auth.login"))
 
     user = db.session.query(User).where(User.id == user_id).one_or_none()
-    posts = (
-        db.session.query(Post)
-        .where(Post.UserId == user_id)
-        .order_by(Post.creation_date.desc())
-        .all()
-    )
+    posts = get_posts_from_user(user_id) 
 
     follower_count = (
         db.session.query(following_table).filter_by(FollowedUserId=user_id).count()
@@ -107,8 +101,6 @@ def user_name(user_name):
 @user_profile_blueprint.route("/follow/<int:user_id>", methods=["POST"])
 @login_required
 def follow_user(user_id):
-    if "user_id" not in session:
-        return redirect(url_for("auth.login"))
 
     existing_follow = (
         db.session.query(following_table.c.UserId)
