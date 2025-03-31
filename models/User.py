@@ -1,10 +1,18 @@
 from typing import List
 from sqlalchemy.orm import Mapped
-from setup import db
+from setup import db, login_manager
 from .Following import following_table
 from .Like import user_post_likes
+from flask_login import UserMixin
+from werkzeug.security import generate_password_hash, check_password_hash
 
-class User(db.Model):
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(user_id)
+
+
+class User(db.Model, UserMixin):
     __tablename__ = "users"
 
     id: Mapped[int] = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -41,9 +49,9 @@ class User(db.Model):
     )
 
     def __init__(
-        self, passwordHash, EmailAdress, UserName, Private=None, ProfilePictureId=None
+        self, password, EmailAdress, UserName, Private=None, ProfilePictureId=None
     ):
-        self.passwordHash = passwordHash
+        self.passwordHash = generate_password_hash(password)
         self.EmailAdress = EmailAdress
         self.UserName = UserName
         self.Private = Private
@@ -51,3 +59,6 @@ class User(db.Model):
 
     def __repr__(self):
         return f"<id: {self.id}, Username: {self.UserName}>"
+
+    def check_password(self, password):
+        return check_password_hash(self.passwordHash, password)

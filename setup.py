@@ -5,6 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from sqlalchemy import MetaData
 from turbo_flask import Turbo
+from flask_login import LoginManager
 
 from utils.format_content import format_content
 
@@ -26,7 +27,12 @@ metadata = MetaData(naming_convention=convention)
 db = SQLAlchemy(app, metadata=metadata)
 migrate = Migrate(app, db)
 
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = "auth.login"
+
+
 @app.context_processor
 def custom_template_function():
-        
-    return dict(format_content = format_content)
+
+    return dict(format_content=format_content)

@@ -4,21 +4,22 @@ from models import ProfilePicture, Settings, User
 from setup import db
 from utils.hash_password import hash_password
 from utils.lang import get_lang, lang_names, default_lang
+from flask_login import login_required
 
 
 settings_blueprint = Blueprint("settings", __name__, template_folder="templates")
 
+
 @settings_blueprint.route("/settings", methods=["GET"])
+@login_required
 def settings():
-    if "user_id" not in session:
-        return redirect(url_for("auth.login"))
 
     user_settings = (
         db.session.query(Settings)
         .where(Settings.UserId == session["user_id"])
         .one_or_none()
     )
-
+    print(user_settings)
     if user_settings is None:
         user_settings = Settings(session["user_id"])
         db.session.add(user_settings)
@@ -28,7 +29,7 @@ def settings():
 
     if "language" not in session:
         session["language"] = default_lang
-        
+
     session.modified = True
 
     return render_template(
@@ -38,11 +39,11 @@ def settings():
         lang=get_lang(session["language"]),
         available_lang=lang_names,
     )
-    
+
+
 @settings_blueprint.route("/edit_profile", methods=["GET", "POST"])
+@login_required
 def edit_profile():
-    if "user_id" not in session:
-        return redirect(url_for("auth.login"))
 
     user = db.session.query(User).where(User.id == session["user_id"]).one_or_none()
 
@@ -79,11 +80,11 @@ def edit_profile():
     return render_template(
         "edit_profile.html", user=user, lang=get_lang(session["language"])
     )
-    
+
+
 @settings_blueprint.route("/toggle_dark_mode", methods=["POST"])
+@login_required
 def toggle_dark_mode():
-    if "user_id" not in session:
-        return redirect(url_for("auth.login"))
 
     user_settings = (
         db.session.query(Settings)
@@ -102,11 +103,10 @@ def toggle_dark_mode():
     session.modified = True
     return redirect(url_for("settings.settings"))
 
-@settings_blueprint.route("/change_language", methods=["POST"])
-def change_language():
-    if "user_id" not in session:
-        return redirect(url_for("auth.login"))
 
+@settings_blueprint.route("/change_language", methods=["POST"])
+@login_required
+def change_language():
     language = request.form["language"]
 
     res = (

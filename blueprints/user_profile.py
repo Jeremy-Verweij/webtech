@@ -4,10 +4,15 @@ from sqlalchemy import and_
 from utils.lang import get_lang, lang_names, default_lang
 from setup import db
 from models import *
+from flask_login import login_required
 
-user_profile_blueprint = Blueprint("user_profile", __name__, template_folder="templates")
+user_profile_blueprint = Blueprint(
+    "user_profile", __name__, template_folder="templates"
+)
+
 
 @user_profile_blueprint.route("/profile_picture/<int:user_id>")
+@login_required
 def profile_picture(user_id):
 
     user = db.session.query(User).where(User.id == user_id).one_or_none()
@@ -28,8 +33,10 @@ def profile_picture(user_id):
     return redirect(
         url_for("static", filename="default_profile.jpg")
     )  # Change this to your default image path
-    
+
+
 @user_profile_blueprint.route("/profile/<int:user_id>")
+@login_required
 def profile(user_id):
     if "user_id" not in session:
         return redirect(url_for("auth.login"))
@@ -82,19 +89,23 @@ def profile(user_id):
         lang=get_lang(session["language"]),
     )
 
+
 @user_profile_blueprint.route("/user_name/<user_name>")
+@login_required
 def user_name(user_name):
     user = db.session.query(User).where(User.UserName == str(user_name)).one_or_none()
-    
+
     print(str(user_name))
-    
+
     if user == None:
         return redirect(url_for("index"))
-    
-    return redirect(url_for("user_profile.profile", user_id = user.id))
+
+    return redirect(url_for("user_profile.profile", user_id=user.id))
+
 
 # Follow/Unfollow User
 @user_profile_blueprint.route("/follow/<int:user_id>", methods=["POST"])
+@login_required
 def follow_user(user_id):
     if "user_id" not in session:
         return redirect(url_for("auth.login"))
@@ -121,4 +132,3 @@ def follow_user(user_id):
     db.session.commit()
 
     return redirect(url_for("user_profile.profile", user_id=user_id))
-
