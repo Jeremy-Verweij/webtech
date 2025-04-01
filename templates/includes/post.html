@@ -3,10 +3,10 @@
     <div class="d-flex">
       <a
         class="text-reset text-decoration-none"
-        href="/profile/{{post.UserId}}"
+        href="{{ url_for('user_profile.profile', user_id = post.UserId) }}"
       >
         <img
-          src="{{ url_for('profile_picture', user_id=post.UserId) }}"
+          src="{{ url_for('user_profile.profile_picture', user_id=post.UserId) }}"
           class="rounded-circle d-inline"
           width="40"
           height="40"
@@ -25,10 +25,10 @@
       <div class="d-flex">
         <a
           class="text-reset text-decoration-none"
-          href="/profile/{{post.Repost.UserId}}"
+          href="{{ url_for('user_profile.profile', user_id = post.Repost.UserId) }}"
         >
           <img
-            src="{{ url_for('profile_picture', user_id=post.Repost.UserId) }}"
+            src="{{ url_for('user_profile.profile_picture', user_id=post.Repost.UserId) }}"
             class="rounded-circle d-inline"
             width="40"
             height="40"

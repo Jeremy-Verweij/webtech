@@ -9,7 +9,7 @@
         </div>
         <div class="card-body text-center">
           <img
-            src="{{ url_for('profile_picture', user_id=user.id) }}"
+            src="{{ url_for('user_profile.profile_picture', user_id=user.id) }}"
             class="rounded-circle"
             width="150"
             height="150"
@@ -29,7 +29,7 @@
 
           {% if user.id != session['user_id'] %}
           <form
-            action="{{ url_for('follow_user', user_id=user.id) }}"
+            action="{{ url_for('user_profile.follow_user', user_id=user.id) }}"
             method="post"
           >
             <button
@@ -44,20 +44,13 @@
 
       <div class="mt-4">
         <h4>{{lang['profile_recent_posts']}}</h4>
-        {% for post in posts %} {% if post.Title != None and post.Content !=
-        None and post.Title != "" and post.Content != "" %}
-        <div class="card mt-3">
-          <div class="card-body">
-            <h5>{{ post.Title }}</h5>
-            <p>{{ post.Content }}</p>
-            <small class="text-white"
-              >{{lang['profile_likes']}}: {{ post.Likes }}</small
-            >
-          </div>
+        <div id="posts" class="pb-5">
+          {% if posts|length > 0 %} {% for post in posts | reverse%} {% include
+          'includes/post_outer.html' %} {% endfor %} {% else %}
+          <p class="text-muted">{{lang['profile_no_posts']}}</p>
+          {% endif %}
         </div>
-        {% endif %} {% else %}
-        <p class="text-white">{{lang['profile_no_posts']}}</p>
-        {% endfor %}
+        {% include "includes/repost.html" %}
       </div>
 
       <div class="mt-4">
@@ -66,11 +59,11 @@
         <div class="card mb-2">
           <div class="card-body d-flex justify-content-between">
             <a
-              href="{{ url_for('profile', user_id=followed.id) }}"
-              class="text-decoration-none text-white"
+              href="{{ url_for('user_profile.profile', user_id=followed.id) }}"
+              class="text-decoration-none"
             >
               <img
-                src="{{ url_for('profile_picture', user_id=followed.id) }}"
+                src="{{ url_for('user_profile.profile_picture', user_id=followed.id) }}"
                 class="rounded-circle"
                 width="40"
                 height="40"

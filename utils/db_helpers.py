@@ -1,4 +1,4 @@
-from sqlalchemy import func, select
+from sqlalchemy import and_, func, select
 from sqlalchemy.orm import selectinload
 from setup import db
 from models import *
@@ -14,33 +14,16 @@ def get_post(post_id):
 
     return res
 
-
-def get_comment(comment_id):
-    return get_post(comment_id)
-
-
-def get_comments(post_id):
-    return (
-        db.session.query(
-            Post.id.label("CommentID"),
-            Post.creation_date.label("Date"),
-            Post.UserId.label("UserID"),
-            func.count(user_post_likes.c.PostId).label("Likes"),
-            User.UserName.label("UserName"),
-            Post.Content.label("Content"),
-        )
-        .where(Post.ParentPostId == post_id)
-        .join(User, User.id == Post.UserId)
-        .outerjoin(user_post_likes, user_post_likes.c.PostId == Post.id)
-        .group_by(Post.id)
-        .order_by(Post.creation_date.desc())
-        .all()
-    )
-
-
 def get_posts():
 
     stmt = select(Post).options(selectinload(Post.comments, recursion_depth=None)).where(Post.ParentPostId == None)
+    res = db.session.execute(stmt).scalars().all()
+
+    return res
+
+def get_posts_from_user(user_id: int):
+
+    stmt = select(Post).options(selectinload(Post.comments, recursion_depth=None)).where(and_(Post.ParentPostId == None, Post.UserId == user_id))
     res = db.session.execute(stmt).scalars().all()
 
     return res
