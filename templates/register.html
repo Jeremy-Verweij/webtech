@@ -37,8 +37,8 @@
         role="tabpanel"
         aria-labelledby="tab-login"
       >
-        {% from "_formhelpers.html" import render_field %}
-        <form method="post">
+        {% from "macros/_formhelpers.html" import render_field %}
+        <form method="post" novalidate>
           <dl>
             <!-- Username -->
             {{ render_field(form.username, class_="form-control") }}
