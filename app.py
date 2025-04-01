@@ -242,7 +242,6 @@ def settings():
     if "user_id" not in session:
         return redirect(url_for("auth.login"))
 
-    # Get or create user settings
     user_settings = (
         db.session.query(Settings)
         .where(Settings.UserId == session["user_id"])
@@ -258,15 +257,12 @@ def settings():
 
     form = SettingsForm()
 
-    # Populate language choices
     form.language.choices = [(lang, name) for lang, name in lang_names.items()]
     
-    # Set default values for the form
     form.language.data = user_settings.Language
     form.dark_mode.data = user_settings.DarkMode
 
     if form.validate_on_submit():
-        # Only process if form submitted, but currently this is only needed for language changes via POST.
         if form.language.data != user_settings.Language:
             user_settings.Language = form.language.data
             db.session.commit()
