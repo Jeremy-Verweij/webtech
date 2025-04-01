@@ -2,21 +2,23 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h2>{{lang['settings']}}</h2>
+    <h2>{{ lang['settings'] }}</h2>
+
+    <!-- Language Selection Form -->
     <form action="{{ url_for('change_language') }}" method="POST" class="form-inline">
-        <label for="language">{{lang['settings_select_lang']}}</label>
-        <select name="language" class="form-control" onchange="this.form.submit()">
-            {% for a_lang in available_lang%}
-                <option value="{{a_lang}}" {% if session['language'] == a_lang%}selected{% endif %}>{{available_lang[a_lang]}}</option>
-            {% endfor %}
-        </select>
+        {{ form.hidden_tag() }}
+        <div class="form-group">
+            <label for="language">{{ lang['settings_select_lang'] }}</label>
+            {{ form.language(class="form-control", onchange="this.form.submit()") }}
+        </div>
     </form>
 
-    <!-- Dark Mode Toggle -->
+    <!-- Dark Mode Toggle Form -->
     <form action="{{ url_for('toggle_dark_mode') }}" method="POST" class="form-inline mt-4">
-        <label for="dark_mode">Enable Dark Mode</label>
-        <input class="form-check-input" type="checkbox" id="darkModeToggle" name="dark_mode"
-               {% if user_settings.DarkMode %}checked{% endif %} onchange="this.form.submit()">
+        <div class="form-group">
+            <label for="dark_mode">{{ lang['dark_mode'] }} Darkmode</label>
+            {{ form.dark_mode(class="form-check-input", onchange="this.form.submit()") }}
+        </div>
     </form>
 </div>
 {% endblock %}

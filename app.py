@@ -2,6 +2,10 @@ import io
 from flask import make_response, render_template, request, redirect, url_for, session
 import os
 
+from flask_wtf import FlaskForm
+from wtforms import SelectField, BooleanField
+from wtforms.validators import DataRequired
+
 from sqlalchemy import and_
 from setup import app, db
 from models import *
@@ -229,12 +233,16 @@ def edit_profile():
         "edit_profile.html", user=user, lang=get_lang(session["language"])
     )
 
+class SettingsForm(FlaskForm):
+    language = SelectField('Language', coerce=str, choices=[], validators=[DataRequired()])
+    dark_mode = BooleanField('Enable Dark Mode')
 
 @app.route("/settings", methods=["GET", "POST"])
 def settings():
     if "user_id" not in session:
         return redirect(url_for("auth.login"))
 
+    # Get or create user settings
     user_settings = (
         db.session.query(Settings)
         .where(Settings.UserId == session["user_id"])
@@ -248,21 +256,32 @@ def settings():
 
     session["dark_mode"] = user_settings.DarkMode
 
-    if request.method == "POST":
-        user_settings.Language = request.form["language"]
-        db.session.commit()
-        return redirect(url_for("settings"))
+    form = SettingsForm()
+
+    # Populate language choices
+    form.language.choices = [(lang, name) for lang, name in lang_names.items()]
+    
+    # Set default values for the form
+    form.language.data = user_settings.Language
+    form.dark_mode.data = user_settings.DarkMode
+
+    if form.validate_on_submit():
+        # Only process if form submitted, but currently this is only needed for language changes via POST.
+        if form.language.data != user_settings.Language:
+            user_settings.Language = form.language.data
+            db.session.commit()
+            session["language"] = form.language.data
+            return redirect(url_for("settings"))
 
     if "language" not in session:
         session["language"] = default_lang
 
     return render_template(
         "settings.html",
-        language=user_settings.Language,
-        user_settings=user_settings,
+        form=form,
         lang=get_lang(session["language"]),
-        available_lang=lang_names,
     )
+
 
 
 @app.route("/toggle_dark_mode", methods=["POST"])
@@ -286,7 +305,6 @@ def toggle_dark_mode():
     session["dark_mode"] = user_settings.DarkMode
 
     return redirect(url_for("settings"))
-
 
 @app.route("/change_language", methods=["POST"])
 def change_language():
