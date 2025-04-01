@@ -48,9 +48,9 @@
       <h6 class="mt-2">{{ post['Repost']['Title'] }}</h6>
       {% endif %} {% if post['Repost']['Content'] == None %}
       <p>{{lang['post_deleted']}}</p>
-      {% else %}
-      <p>{{ post['Repost']['Content'] }}</p>
-      {% endif %}
+      {% else %} {% autoescape false %}
+      <p>{{ format_content(post['Repost']['Content']) }}</p>
+      {% endautoescape %} {% endif %}
     </div>
     {% endif %} {% if post['Title'] == None %}
     <h6 class="mt-2">{{lang['post_deleted']}}</h6>

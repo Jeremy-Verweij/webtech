@@ -15,6 +15,7 @@ def format_content(content:str):
     content = content.replace("  ", " &nbsp;")
     content = content.replace("\n", "<br>")
     content = re.sub(r'##(.*?)##', r'<strong>\1</strong>', content)
+    content = re.sub(r'~~(.*?)~~', r'<i>\1</i>', content)
     content = re.sub(r'@(\w+)', "<a href='user_name/" + r'\1' + "'>@" + r'\1' + "</a>", content)
     content = re.sub(r'https?://[a-zA-Z0-9\-._~:/?#[\]@!$&\'()*+,;=.]+', url_to_html, content)
     
