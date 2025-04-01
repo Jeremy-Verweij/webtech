@@ -2,7 +2,7 @@ from io import BytesIO
 from flask import Blueprint, make_response, redirect, url_for, session, render_template
 from sqlalchemy import and_
 from utils.db_helpers import get_posts_from_user
-from utils.lang import get_lang, lang_names, default_lang
+from utils.lang import get_lang, default_lang
 from setup import db
 from models import *
 from flask_login import login_required

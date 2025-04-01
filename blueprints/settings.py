@@ -19,7 +19,7 @@ def settings():
         .where(Settings.UserId == session["user_id"])
         .one_or_none()
     )
-    print(user_settings)
+
     if user_settings is None:
         user_settings = Settings(session["user_id"])
         db.session.add(user_settings)
@@ -31,7 +31,7 @@ def settings():
         session["language"] = default_lang
 
     session.modified = True
-
+    
     return render_template(
         "settings.html",
         language=user_settings.Language,

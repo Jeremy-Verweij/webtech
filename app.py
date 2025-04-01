@@ -1,10 +1,9 @@
 import os
-from flask import render_template, redirect, url_for, session
-from setup import app, db
-from models import *
+from flask import render_template, session
+from setup import app
 from blueprints import *
-from utils.lang import get_lang, default_lang
-from utils.db_helpers import *
+from utils.lang import get_lang
+from utils.db_helpers import get_posts
 from utils.jinja_uuid_gen import gen_uuid
 from utils.turbo_helper import turbo_user_id_init
 from flask_login import login_required

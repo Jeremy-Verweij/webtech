@@ -3,7 +3,6 @@ from forms.login import LoginForm
 from forms.register import RegistrationForm
 from setup import db
 from models import *
-from utils.hash_password import hash_password
 from flask_login import login_user, login_required, logout_user
 
 auth_blueprint = Blueprint(
