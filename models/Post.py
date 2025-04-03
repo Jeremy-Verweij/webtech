@@ -12,7 +12,7 @@ class Post(db.Model):
     id: Mapped[int] = db.mapped_column(db.Integer, primary_key=True, autoincrement=True)
     Title: Mapped[str] = db.Column(db.String(50))
     Content: Mapped[str] = db.Column(db.Text)
-    creation_date: Mapped[datetime] = db.Column(db.DateTime, server_default=func.now())
+    creation_date: Mapped[datetime] = db.Column(db.DateTime, default=datetime.now)
 
     UserId: Mapped[int] = db.Column(
         db.Integer, db.ForeignKey("users.id"), nullable=False

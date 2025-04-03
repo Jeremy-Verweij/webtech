@@ -13,9 +13,7 @@
         />&nbsp;
         <h5 class="ml-2 d-inline">{{ post['User']['UserName'] }}</h5>
       </a>
-      {% with date = post['creation_date'].strftime("%x") + " " +
-      post['creation_date'].strftime("%H") + ":" +
-      post['creation_date'].strftime("%M")%}
+      {% with date = format_date(post['creation_date'])%}
       <span class="ml-2 text-end flex-fill">{{ date }} </span>
       {% endwith %}
     </div>
@@ -35,9 +33,7 @@
           />&nbsp;
           <h5 class="ml-2 d-inline">{{ post['Repost']['UserName'] }}</h5>
         </a>
-        {% with date = post['Repost']['creation_date'].strftime("%x") + " " +
-        post['Repost']['creation_date'].strftime("%H") + ":" +
-        post['Repost']['creation_date'].strftime("%M")%}
+        {% with date = format_date(post['Repost']['creation_date'])%}
         <span class="nl-2 text-end flex-fill">{{date}}</span>
         {% endwith %}
       </div>

@@ -1,3 +1,4 @@
+import datetime
 import re
 
 def url_to_html(match):
@@ -19,3 +20,8 @@ def format_content(content:str):
     content = re.sub(r'https?://[a-zA-Z0-9\-._~:/?#[\]@!$&\'()*+,;=.]+', url_to_html, content)
     
     return content
+
+def format_date(date:datetime):
+    return date.strftime("%x") + \
+        " " + date.strftime("%H") + \
+        ":" + date.strftime("%M")

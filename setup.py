@@ -7,7 +7,7 @@ from sqlalchemy import MetaData
 from turbo_flask import Turbo
 from flask_login import LoginManager
 
-from utils.format_content import format_content
+from utils.format_content import format_content, format_date
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -35,4 +35,4 @@ login_manager.login_view = "auth.login"
 @app.context_processor
 def custom_template_function():
 
-    return dict(format_content=format_content)
+    return dict(format_content=format_content, format_date=format_date)
